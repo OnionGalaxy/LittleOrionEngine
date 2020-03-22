@@ -183,13 +183,28 @@ void Prefab::RemoveGameObjectFromOriginalPrefab(GameObject * gameobject_to_remov
 
 void Prefab::RemoveInstance(GameObject * instance)
 {
-	auto it = std::remove_if(instances.begin(), instances.end(), [instance](auto & gameobject) {
-		return instance == gameobject;
-	});
-	if (it != instances.end())
+	//auto it = std::remove_if(instances.begin(), instances.end(), [instance](auto & gameobject) {
+	//	return instance == gameobject;
+	//});
+	
+	for(auto& gameobject : instances)
 	{
-		instances.erase(it);
+	
+		if(instance == gameobject)
+		{
+			auto it = std::remove(instances.begin(), instances.end(), gameobject);
+			if(it != instances.end())
+			{
+				instances.erase(it);
+			}
+			break;
+		}
 	}
+
+	//if (it != instances.end())
+	//{
+	//	instances.erase(it);
+	//}
 }
 
 bool Prefab::IsOverwritable() const
