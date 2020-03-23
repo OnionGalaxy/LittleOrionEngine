@@ -27,15 +27,6 @@ bool ModuleResourceManager::Init()
 update_status ModuleResourceManager::PreUpdate()
 {
 
-	if ((thread_timer->Read() - last_imported_time) >= importer_interval_millis)
-	{
-		//importing_thread.join();
-		//importing_thread = std::thread(&ModuleResourceManager::StartThread, this);
-		//auto it = std::remove_if(resource_cache.begin(), resource_cache.end(), [](const std::shared_ptr<Resource> & resource) {		
-		//	return resource.use_count() == 1;
-		//});
-		//resource_cache.erase(it,resource_cache.end());
-	}
 	return update_status::UPDATE_CONTINUE;
 }
 
