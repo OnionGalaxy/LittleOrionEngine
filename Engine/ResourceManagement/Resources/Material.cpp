@@ -150,22 +150,3 @@ const std::shared_ptr<Texture>& Material::GetMaterialTexture(MaterialTextureType
 {
 	return textures[type];
 }
-
-void Material::ChangeMaterialType(MaterialType type) 
-{ 
-	material_type = type; 
-}
-
-const char* Material::GetMaterialTypeName(MaterialType type)
-{
-	switch (type)
-	{
-	case MaterialType::MATTRANSPARENT:
-		return "Transparent";
-		break;
-	case MaterialType::MATOPAQUE:
-		return "Opaque";
-		break;
-	}
-}
-

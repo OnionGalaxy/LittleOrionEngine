@@ -14,13 +14,6 @@
 class Material : public Resource
 {
 public:
-	enum class MaterialType
-	{
-		MATTRANSPARENT, 
-		MATOPAQUE, 
-		NUM_OF_ITEMS
-	};
-
 	enum MaterialTextureType
 	{
 		DIFFUSE,
@@ -44,10 +37,6 @@ public:
 
 	void LoadInMemory() override {}
 
-	void ChangeMaterialType(MaterialType type);
-
-	const char * GetMaterialTypeName(MaterialType type);
-
 public:
 	static const size_t MAX_MATERIAL_TEXTURE_TYPES = static_cast<size_t>(MaterialTextureType::UNKNOWN);
 
@@ -65,8 +54,6 @@ public:
 	float metalness = 0.5f;
 	float alpha_blending = 1.0F;
 	bool show_checkerboard_texture = false;
-
-	MaterialType material_type = MaterialType::MATOPAQUE;
 };
 
 namespace Loader

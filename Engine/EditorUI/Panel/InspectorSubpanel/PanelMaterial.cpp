@@ -46,27 +46,6 @@ void PanelMaterial::Render(Material* material)
 			}
 			ImGui::EndCombo();
 		}
-		
-		if (ImGui::BeginCombo("Type", material->GetMaterialTypeName(material->material_type)))
-		{
-			int size = static_cast<int>(Material::MaterialType::NUM_OF_ITEMS);
-			for (int i=0; i<size; ++i)
-			{
-				bool is_selected = (material->material_type == Material::MaterialType(i));
-				if (ImGui::Selectable((material->GetMaterialTypeName(Material::MaterialType(i))), is_selected))
-				{
-					
-					material->ChangeMaterialType(Material::MaterialType());
-					if (is_selected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}
-					SaveMaterial(material);
-				}
-
-			}
-			ImGui::EndCombo();
-		}
 
 		ImGui::Spacing();
 		ImGui::Separator();
@@ -140,11 +119,7 @@ void PanelMaterial::ShowMaterialTextureMap(Material* material, Material::Materia
 
 		ImGui::ColorEdit3("Color", material->diffuse_color);
 		ImGui::SliderFloat("K diffuse", &material->k_diffuse, 0, 1);
-		if (material->material_type == Material::MaterialType::MATTRANSPARENT)
-		{
-			ImGui::SliderFloat("Transparency", &material->alpha_blending, 0, 1);
-		}
-		
+		ImGui::SliderFloat("Transparency", &material->alpha_blending, 0, 1);
 		ImGui::Unindent();
 
 		break;
