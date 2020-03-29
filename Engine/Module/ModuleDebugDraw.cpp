@@ -115,14 +115,14 @@ public:
             glBindTexture(GL_TEXTURE_2D, handleToGL(glyphTex));
         }
 
-        bool already_blend = glIsEnabled(GL_BLEND);
+     /*   bool already_blend = glIsEnabled(GL_BLEND);
 
         if (!already_blend)
         {
             glEnable(GL_BLEND);
-        }
+        }*/
 
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         bool already = glIsEnabled(GL_DEPTH_TEST);
         glDisable(GL_DEPTH_TEST);
 
@@ -131,10 +131,10 @@ public:
 
         glDrawArrays(GL_TRIANGLES, 0, count); // Issue the draw call
 
-        if (!already_blend)
-        {
-            glDisable(GL_BLEND);
-        }
+        //if (!already_blend)
+        //{
+        //    glDisable(GL_BLEND);
+        //}
 
         glUseProgram(0);
         glBindVertexArray(0);

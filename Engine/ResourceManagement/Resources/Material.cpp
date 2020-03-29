@@ -55,6 +55,7 @@ void Material::Save(Config& config) const
 	config.AddFloat(shininess, "shininess");
 	config.AddFloat(metalness, "metalness");
 	config.AddFloat(roughness, "roughness");
+	config.AddFloat(alpha_blending, "alpha_blending");
 
 	//colors
 	config.AddColor(float4(diffuse_color[0], diffuse_color[1], diffuse_color[2], diffuse_color[3]), "difusseColor");
@@ -108,6 +109,7 @@ void Material::Load(const Config& config)
 	shininess = config.GetFloat("shininess", 1.0f);
 	metalness = config.GetFloat("metalness", 0.5f);
 	roughness = config.GetFloat("roughness", 0.5f);
+	alpha_blending = config.GetFloat("alpha_blending", 1.0F);
 
 	//colors
 	float4 diffuse;

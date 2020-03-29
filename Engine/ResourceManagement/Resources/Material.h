@@ -52,7 +52,7 @@ public:
 	float shininess = 1.0f;
 	float roughness = 0.5f;
 	float metalness = 0.5f;
-
+	float alpha_blending = 1.0F;
 	bool show_checkerboard_texture = false;
 };
 

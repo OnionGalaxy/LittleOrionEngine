@@ -119,6 +119,7 @@ void PanelMaterial::ShowMaterialTextureMap(Material* material, Material::Materia
 
 		ImGui::ColorEdit3("Color", material->diffuse_color);
 		ImGui::SliderFloat("K diffuse", &material->k_diffuse, 0, 1);
+		ImGui::SliderFloat("Transparency", &material->alpha_blending, 0, 1);
 		ImGui::Unindent();
 
 		break;
