@@ -110,6 +110,7 @@ void ComponentMeshRenderer::RenderMaterial(GLuint shader_program) const
 	AddEmissiveUniforms(shader_program);
 	AddSpecularUniforms(shader_program);
 	AddAmbientOclusionUniforms(shader_program);
+	AddNormalUniforms(shader_program);
 }
 
 void ComponentMeshRenderer::AddDiffuseUniforms(unsigned int shader_program) const
@@ -151,6 +152,41 @@ void ComponentMeshRenderer::AddAmbientOclusionUniforms(unsigned int shader_progr
 	glUniform1f(glGetUniformLocation(shader_program, "material.k_ambient"), material_to_render->k_ambient);
 }
 
+void ComponentMeshRenderer::AddNormalUniforms(unsigned int shader_program) const
+{
+	glActiveTexture(GL_TEXTURE3);
+	BindTexture(Material::MaterialTextureType::NORMAL);
+	glUniform1i(glGetUniformLocation(shader_program, "material.normal_map"), 4);
+	//bool texture_normal = BindTextureNormal(Texture::TextureType::NORMAL);
+
+	int active_subroutines;
+	glGetIntegerv(GL_ACTIVE_SUBROUTINES, &active_subroutines);
+
+	//if (texture_normal)
+	//{
+	//	unsigned index = glGetSubroutineIndex(shader_program, GL_FRAGMENT_SHADER,"ComputeMaterialWithNormalMap");
+	//	if (index == GL_INVALID_INDEX)
+	//	{
+	//		APP_LOG_ERROR("Invalid index");
+	//	}
+	//	unsigned indices[1]; // NUMBER_SUBROUTINES == 1 in our example
+	//	unsigned location = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER,"NormalSoubroutine");
+	//	indices[index] = location;
+	//	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, indices);
+	//	glUniform1i(glGetUniformLocation(shader_program, "material.normal_map"), 4);
+	//}
+	//else {
+	//	GLuint index = glGetSubroutineIndex(shader_program, GL_FRAGMENT_SHADER, "ComputeMaterialWithoutNormalMap"); 
+	//	if (index == GL_INVALID_INDEX)
+	//	{
+	//		APP_LOG_ERROR("Invalid index2");
+	//	}
+	//	unsigned indices[1]; 
+	//	unsigned location = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "NormalSoubroutine");
+	//	indices[index] = location;
+	//	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, indices);
+	//}
+}
 void ComponentMeshRenderer::BindTexture(Material::MaterialTextureType id) const
 {
 	GLuint texture_id;

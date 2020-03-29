@@ -20,6 +20,7 @@ public:
 		SPECULAR,
 		EMISSIVE,
 		OCCLUSION,
+		NORMAL,
 		UNKNOWN
 	};
 
