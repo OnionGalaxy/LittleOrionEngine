@@ -82,7 +82,7 @@ private:
 	std::unordered_map<std::string, GLuint> loaded_programs;
 	std::vector<const char *> names;
 
-	friend class PanelMaterial;
+	friend class PanelComponent;
 };
 
 #endif //_MODULEPROGRAM_H_

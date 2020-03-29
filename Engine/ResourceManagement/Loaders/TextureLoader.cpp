@@ -1,11 +1,10 @@
 #include "TextureLoader.h"
-#include "Main/Application.h"
-#include "Module/ModuleFileSystem.h"
-#include "ResourceManagement/Resources/Texture.h"
-#include "Helper/Config.h"
-
+#include <Main/Application.h>
+#include <Module/ModuleFileSystem.h>
 #include <GL/glew.h>
 #include "Brofiler/Brofiler.h"
+#include <ResourceManagement/Resources/Texture.h>
+#include <Helper/Config.h>
 
 #include <IL/il.h>
 #include <IL/ilu.h>
@@ -13,7 +12,6 @@
 
 std::vector<char> TextureLoader::LoadCompressedDDS(const std::string& file_path, DDS::DDS_HEADER & dds_header)
 {
-
 	size_t dds_content_size;
 	char * loaded_data = App->filesystem->Load(file_path.c_str(), dds_content_size);
 	std::vector<char> data;

@@ -1,5 +1,5 @@
 #include "ComponentAABB.h"
-#include "ComponentMeshRenderer.h"
+#include "ComponentMesh.h"
 #include "Main/GameObject.h"
 #include "Brofiler/Brofiler.h"
 
@@ -12,11 +12,6 @@ ComponentAABB::ComponentAABB(GameObject * owner) : Component(owner, ComponentTyp
 {
 
 }
-
-void ComponentAABB::Copy(Component * component_to_copy) const
-{ 
-	*static_cast<ComponentAABB*>(component_to_copy) = *this; 
-};
 
 void ComponentAABB::Save(Config& config) const
 {
@@ -31,7 +26,7 @@ void ComponentAABB::Load(const Config& config)
 void ComponentAABB::GenerateBoundingBox()
 {
 	bool has_mesh = false;
-	ComponentMeshRenderer * owner_mesh = static_cast<ComponentMeshRenderer*>(owner->GetComponent(ComponentType::MESH_RENDERER));
+	ComponentMesh * owner_mesh = static_cast<ComponentMesh*>(owner->GetComponent(ComponentType::MESH));
 	has_mesh = owner_mesh != nullptr;
 	
 	if (has_mesh)
@@ -76,13 +71,5 @@ void ComponentAABB::GenerateGlobalBoundingBox()
 bool ComponentAABB::IsEmpty() const
 {
 	return bounding_box.Size().Length() == 0;
-}
-
-Component* ComponentAABB::Clone(bool original_prefab) const
-{
-	ComponentAABB * created_component;
-	created_component = new ComponentAABB();
-	*created_component = *this;
-	return created_component;
 }
 

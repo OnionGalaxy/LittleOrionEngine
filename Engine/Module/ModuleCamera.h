@@ -27,12 +27,13 @@ public:
 	ComponentCamera* CreateComponentCamera();
 	void RemoveComponentCamera(ComponentCamera* camera_to_remove);
 
-	bool IsSceneCameraMoving() const;
+	bool IsMovementEnabled() const;
 
 private:
 	void SelectMainCamera();
 
-	bool IsSceneCameraOrbiting() const;
+	void SetOrbit(bool is_orbiting);
+	bool IsOrbiting() const;
 
 	void SetMovement(bool movement_enabled);
 	void HandleSceneCameraMovements();
@@ -50,13 +51,11 @@ private:
 	bool game_window_is_hovered = false;
 
 	bool is_orbiting = false;
-	bool orbit_movement_enabled = false;
 	float speed_up;
 
 
 	std::vector<ComponentCamera*> cameras;
 	friend class ModuleEditor;
-
 };
 
 #endif //_MODULECAMERA_H_

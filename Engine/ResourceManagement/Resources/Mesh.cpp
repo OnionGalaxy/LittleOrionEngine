@@ -3,22 +3,15 @@
 
 Mesh::Mesh(std::vector<Vertex> && vertices, std::vector<uint32_t> && indices, std::string mesh_file_path) : vertices(vertices),
 indices(indices),
-Resource(0, mesh_file_path)
+Resource("", mesh_file_path)
 {
 	LoadInMemory();
 	
 }
-Mesh::Mesh(std::string mesh_file_path) :
-Resource(0, mesh_file_path)
-{
-}
 Mesh::~Mesh() {
-	if (vbo != 0)
-	{
-		glDeleteBuffers(1, &vbo);
-		glDeleteBuffers(1, &ebo);
-		glDeleteVertexArrays(1, &vao);
-	}
+	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &ebo);
+	glDeleteVertexArrays(1, &vao);
 }
 
 GLuint Mesh::GetVAO() const
@@ -26,15 +19,10 @@ GLuint Mesh::GetVAO() const
 	return vao;
 }
 
-int Mesh::GetNumTriangles() const
-{
-	return indices.size() / 3;
-}
-
 std::vector<Triangle> Mesh::GetTriangles() const
 {
 	std::vector<Triangle> triangles;
-	triangles.reserve(indices.size()/3);
+	triangles.reserve(vertices.size()/3);
 	for (size_t i = 0; i < indices.size(); i += 3)
 	{
 		float3 first_point = vertices[indices[i]].position;

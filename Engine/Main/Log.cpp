@@ -1,7 +1,7 @@
 
 #include "Globals.h"
 #include "Application.h"
-#include "EditorUI/EngineLog.h"
+#include "UI/EngineLog.h"
 #include <mutex>
 
 static std::mutex thread_mutex;

@@ -1,9 +1,8 @@
 #include "OLAABBTree.h"
-
-#include "EditorUI/DebugDraw.h"
-
 #include <assert.h>
 #include <stack>
+#include "UI/DebugDraw.h"
+
 
 OLAABBTree::OLAABBTree(unsigned initial_size)
 {
@@ -204,14 +203,11 @@ void OLAABBTree::InsertLeaf(unsigned leafNodeIndex)
 
 void OLAABBTree::Remove(GameObject * go)
 {
-	if (object_node_index_map.find(go) != object_node_index_map.end())
-	{
-		unsigned nodeIndex = object_node_index_map[go];
-		RemoveLeaf(nodeIndex);
-		DeallocateNode(nodeIndex);
-		object_node_index_map.erase(go);
+	unsigned nodeIndex = object_node_index_map[go];
+	RemoveLeaf(nodeIndex);
+	DeallocateNode(nodeIndex);
+	object_node_index_map.erase(go);
 
-	}
 	return;
 }
 

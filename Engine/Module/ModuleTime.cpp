@@ -1,12 +1,10 @@
 #include "ModuleTime.h"
-
-#include "EditorUI/EngineLog.h"
-#include "Helper/Timer.h"
-#include "Main/Application.h"
 #include "Main/Globals.h"
+#include "Main/Application.h"
 #include "ModuleEditor.h"
-#include "ModuleScriptManager.h"
 #include "ModuleWindow.h"
+#include "UI/EngineLog.h"
+#include "Helper/Timer.h"
 
 #include <SDL/SDL.h>
 
@@ -66,12 +64,8 @@ void ModuleTime::EndFrame()
 	time += delta_time;
 	real_time_since_startup += real_time_delta_time;
 
-	if (frame_count % 10 == 0)
-	{
-		current_fps = 1000.f / real_time_delta_time;
-		App->engine_log->LogFPS(current_fps);
-		App->engine_log->LogMS(real_time_delta_time);
-	}
+	App->engine_log->LogFPS(1000 / real_time_delta_time);
+	App->engine_log->LogMS(real_time_delta_time);
 
 	if (stepping_frame)
 	{
@@ -89,11 +83,6 @@ bool ModuleTime::CleanUp()
 	return true;
 }
 
-float ModuleTime::GetFPS() const
-{
-	return current_fps;
-}
-
 void ModuleTime::SetMaxFPS(int fps)
 {
 	max_fps = fps;
@@ -105,7 +94,6 @@ void ModuleTime::Play()
 	{
 		App->editor->SaveScene(TMP_SCENE_PATH);
 		game_time_clock->Start();
-		App->scripts->InitScripts();
 	}
 	else
 	{
@@ -148,9 +136,4 @@ void ModuleTime::StepFrame()
 void ModuleTime::SetTimeScale(float time_scale)
 {
 	this->time_scale = time_scale;
-}
-
-bool ModuleTime::isGameRunning()
-{
-	return game_time_clock->Started();
 }

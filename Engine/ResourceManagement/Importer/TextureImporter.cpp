@@ -1,10 +1,8 @@
 #include "TextureImporter.h"
 #include "Main/Application.h"
-#include "Module/ModuleFileSystem.h"
 
 #include <algorithm>
 #include "Brofiler/Brofiler.h"
-
 TextureImporter::TextureImporter()
 {
 	APP_LOG_INIT("Initializing DevIL image loader.")
@@ -17,69 +15,63 @@ TextureImporter::TextureImporter()
 	APP_LOG_SUCCESS("DevIL image loader initialized correctly.")
 
 }
-
-ImportResult TextureImporter::Import(const File& imported_file, bool force) const
+std::pair<bool, std::string> TextureImporter::Import(const File & file) const
 {
-	ImportResult import_result;
-
-	if (imported_file.filename.empty() || !imported_file.loaded_correctly)
+	if (file.filename.empty())
 	{
 		APP_LOG_ERROR("Importing material error: Couldn't find the file to import.")
-		return import_result;
+		return std::pair<bool, std::string>(false,"");
 	}
 
-	ImportOptions already_imported = GetAlreadyImportedResource(imported_file);
-	if (already_imported.uuid != 0 && !force) {
-		APP_LOG_INFO("Texture already imported.")
-		import_result.succes = true;
-		import_result.exported_file = already_imported.exported_file;
-		return import_result;
+	std::string already_imported = GetAlreadyImportedResource(file);
+	if (!already_imported.empty()) {
+		return std::pair<bool, std::string>(true, already_imported);
 	}
 
+	App->filesystem->MakeDirectory(LIBRARY_TEXTURES_FOLDER);
+	
 	std::string output_file;
 
-	if (imported_file.filename.find("_normal") != std::string::npos)
+	if (file.filename.find("_normal") != std::string::npos)
 	{
-		output_file = ImportToTGA(imported_file);
+		output_file = ImportToTGA(file);
 	}
 	else 
 	{
-		output_file = ImportToDDS(imported_file);
+		output_file = ImportToDDS(file);
 	}
 
-	import_result.succes = true;
-	import_result.exported_file = output_file;
-
-	return import_result;
+	SaveMetaFile(file, output_file);
+	return std::pair<bool, std::string>(true, output_file);
 }
 
 std::string TextureImporter::ImportMaterialData(const std::string & material_path, const std::string model_base_path) const
 {
 	APP_LOG_INIT("Loading material texture in described path %s.", material_path.c_str());
-	ImportResult import_result = Import(material_path);
-	if (import_result.succes)
+	std::pair<bool, std::string> imported = Import(material_path);
+	if (imported.first)
 	{
-		APP_LOG_SUCCESS("Material loaded correctly from %s.", material_path.c_str());
-		return import_result.exported_file;
+		APP_LOG_SUCCESS("Material loaded correctly.");
+		return imported.second;
 	}
 
 	std::string texture_file_name = GetTextureFileName(material_path);
 	std::string textures_path = model_base_path+ "/" + texture_file_name;
 	APP_LOG_INIT("Loading material texture in model folder path %s.", model_base_path.c_str());
-	import_result = Import(textures_path);
-	if (import_result.succes)
+	imported = Import(textures_path);
+	if (imported.first)
 	{
-		APP_LOG_SUCCESS("Material loaded correctly from %s.", textures_path.c_str());
-		return import_result.exported_file;
+		APP_LOG_SUCCESS("Material loaded correctly.");
+		return imported.second;
 	}
 
 	textures_path = std::string(TEXTURES_PATH) + texture_file_name;
 	APP_LOG_INIT("Loading material texture in textures folder %s.", textures_path.c_str());
-	import_result = Import(textures_path);
-	if (import_result.succes)
+	imported = Import(textures_path);
+	if (imported.first)
 	{
-		APP_LOG_SUCCESS("Material loaded correctly from %s.", textures_path.c_str());
-		return import_result.exported_file;
+		APP_LOG_SUCCESS("Material loaded correctly.");
+		return imported.second;
 	}
 	return "";
 }
@@ -112,6 +104,9 @@ ILubyte * TextureImporter::LoadImageDataInMemory(const std::string& file_path, i
 	return data;
 }
 
+
+
+
 //Remove the material from the cache if the only owner is the cache itself
 
 
@@ -141,7 +136,7 @@ std::string TextureImporter::ImportToDDS(const File & file) const
 	//Get new Name
 
 	std::string texture_name_no_extension = file.filename.substr(0, file.filename.find_last_of("."));
-	std::string output_file = SaveMetaFile(file.file_path, ResourceType::TEXTURE);
+	std::string output_file = LIBRARY_TEXTURES_FOLDER + "/" + texture_name_no_extension + ".dds";
 
 	//Save data
 	ILuint size;
@@ -160,7 +155,7 @@ std::string TextureImporter::ImportToDDS(const File & file) const
 
 std::string TextureImporter::ImportToTGA(const File & file) const
 {
-	std::string output_file = SaveMetaFile(file.file_path, ResourceType::TEXTURE);
+	std::string output_file = LIBRARY_TEXTURES_FOLDER + "/" +file.filename;
 	bool copied = App->filesystem->Copy(file.file_path.c_str(), output_file.c_str());
 	if (!copied)
 	{

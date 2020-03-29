@@ -1,14 +1,14 @@
 #include "Skeleton.h"
 
 
-Skeleton::Skeleton(const uint32_t UID, const std::string & exported_file) : Resource(UID, exported_file)
+Skeleton::Skeleton(const char * const UID, const std::string & exported_file) : Resource(UID, exported_file)
 {
 
 }
 
 Skeleton::Skeleton(std::vector<Joint> && joints, const std::string & exported_file) :
 skeleton(joints),
-Resource(0, exported_file)
+Resource("", exported_file)
 {
 	LoadInMemory();
 

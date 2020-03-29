@@ -6,10 +6,7 @@
 enum class FileType
 {
 	MODEL,
-	PREFAB, //TODO UNIFY MODEL & PREFAB
 	TEXTURE,
-	MATERIAL,
-	MESH,
 	DIRECTORY,
 	ARCHIVE,
 	UNKNOWN
@@ -28,13 +25,8 @@ public:
 	uint64_t modification_timestamp = 0;
 
 	std::vector<std::shared_ptr<File>> children;
-	File* parent = nullptr;
+	File* parent;
 	bool operator==(const File& compare);
-
-	void Refresh();
-public:
-	bool loaded_correctly = true;
-
 private:
 	void GetFileInfo();
 	void GetChildren();

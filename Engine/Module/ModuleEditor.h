@@ -23,9 +23,7 @@ class PanelConsole;
 class PanelDebug;
 class PanelConfiguration;
 class PanelAbout;
-class PanelResourceDatabase;
 class PanelPopups;
-class PanelNavMesh;
 
 class GameObject;
 
@@ -61,9 +59,8 @@ private:
 
 public:
 	GameObject *selected_game_object = nullptr;
-	float3 selected_position = float3(0.0f, 0.0f, 0.0f);
 	ImGuizmo::OPERATION gizmo_operation = ImGuizmo::TRANSLATE;
-	std::string current_scene_path = "";
+
 
 	PanelMenuBar* menu_bar = nullptr;
 	PanelToolBar* toolbar = nullptr;
@@ -76,9 +73,7 @@ public:
 	PanelDebug* debug_panel = nullptr;
 	PanelConfiguration* configuration = nullptr;
 	PanelAbout* about = nullptr;
-	PanelResourceDatabase* resource_database = nullptr;
 	PanelPopups* popups = nullptr;
-	PanelNavMesh* nav_mesh = nullptr;
 
 private:
 	std::vector<Panel*> panels;
