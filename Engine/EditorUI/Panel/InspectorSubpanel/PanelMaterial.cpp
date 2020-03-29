@@ -67,9 +67,6 @@ void PanelMaterial::Render(Material* material)
 		ShowMaterialTextureMap(material, Material::MaterialTextureType::OCCLUSION);
 		ImGui::Spacing();
 
-		ShowMaterialTextureMap(material, Material::MaterialTextureType::NORMAL);
-		ImGui::Spacing();
-
 		ImGui::Separator();
 	}
 }
@@ -157,10 +154,6 @@ void PanelMaterial::ShowMaterialTextureMap(Material* material, Material::Materia
 		ImGui::SliderFloat("Roughness", &material->roughness, 0, 100);
 		ImGui::SliderFloat("Metalness", &material->metalness, 0, 100);
 		ImGui::Unindent();
-
-		break;
-	case Material::MaterialTextureType::NORMAL:
-		ImGui::Text("Normal");
 
 		break;
 	}

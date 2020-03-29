@@ -36,9 +36,7 @@ void Material::Save(Config& config) const
 			case MaterialTextureType::EMISSIVE:
 				config.AddString(textures[i]->exported_file, "Emissive");
 				break;
-			case MaterialTextureType::NORMAL:
-				config.AddString(textures[i]->exported_file, "Normal");
-				break;
+
 			default:
 				break;
 			}
@@ -92,12 +90,7 @@ void Material::Load(const Config& config)
 	{
 		SetMaterialTexture(Material::MaterialTextureType::EMISSIVE, texture_resource);
 	}
-	config.GetString("Normal", texture_path, "");
-	texture_resource = App->resources->Load<Texture>(texture_path);
-	if (texture_resource.get() != nullptr)
-	{
-		SetMaterialTexture(Material::MaterialTextureType::NORMAL, texture_resource);
-	}
+
 	show_checkerboard_texture = config.GetBool("Checkboard", true);
 	config.GetString("ShaderProgram", shader_program, "Blinn phong");
 
