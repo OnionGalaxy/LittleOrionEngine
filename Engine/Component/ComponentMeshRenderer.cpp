@@ -111,7 +111,6 @@ void ComponentMeshRenderer::RenderMaterial(GLuint shader_program) const
 	AddSpecularUniforms(shader_program);
 	AddAmbientOclusionUniforms(shader_program);
 	AddNormalUniforms(shader_program);
-	AddTransparencyUniform(shader_program);
 }
 
 void ComponentMeshRenderer::AddDiffuseUniforms(unsigned int shader_program) const
@@ -187,10 +186,6 @@ void ComponentMeshRenderer::AddNormalUniforms(unsigned int shader_program) const
 	//	indices[index] = location;
 	//	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, indices);
 	//}
-}
-void ComponentMeshRenderer::AddTransparencyUniform(unsigned int shader_program) const
-{
-	glUniform1f(glGetUniformLocation(shader_program, "material.alpha_blending"), material_to_render->alpha_blending);
 }
 void ComponentMeshRenderer::BindTexture(Material::MaterialTextureType id) const
 {

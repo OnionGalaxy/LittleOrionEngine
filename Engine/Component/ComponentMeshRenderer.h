@@ -41,7 +41,6 @@ private:
 	void AddSpecularUniforms(unsigned int shader_program) const;
 	void AddAmbientOclusionUniforms(unsigned int shader_program) const;
 	void AddNormalUniforms(unsigned int shader_program) const;
-	void AddTransparencyUniform(unsigned int shader_program) const;
 	void BindTexture(Material::MaterialTextureType id) const;
 
 public:
