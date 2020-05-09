@@ -22,6 +22,7 @@ public:
 	//void Save(Config& config) const override;
 	//void Load(const Config& config) override;
 	bool debug_enabled = false;
+	bool render_wireframe = false;
 
 private:
 	GameObject* background_go = nullptr;

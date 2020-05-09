@@ -83,6 +83,12 @@ void DebugModeScript::Update()
 		text_fps->text = base_str_fps + stream_fps.str()  + std::string(" (") + stream_ms.str() + std::string("ms)");
 		text_tris->text = base_str_tris + std::to_string(App->renderer->GetRenderedTris());
 		text_verts->text = base_str_verts + std::to_string(App->renderer->GetRenderedVerts());
+
+		if (App->input->GetKeyDown(KeyCode::F9))
+		{
+			App->renderer->SetDrawMode(render_wireframe? ModuleRender::DrawMode::WIREFRAME : ModuleRender::DrawMode::SHADED);
+			render_wireframe = !render_wireframe;
+		}
 	}
 
 }
