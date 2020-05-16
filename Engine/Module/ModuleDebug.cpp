@@ -52,3 +52,8 @@ void ModuleDebug::CreateFrustumCullingDebugScene() const
 	}
 	cubes->SetStatic(true);
 }
+
+ENGINE_API void ModuleDebug::ToggleRenderAABB()
+{
+	show_aabbtree = !show_aabbtree;
+}

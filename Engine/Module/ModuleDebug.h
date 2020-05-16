@@ -1,6 +1,8 @@
 #ifndef _MODULEDEBUG_H_
 #define _MODULEDEBUG_H_
 
+#define ENGINE_EXPORTS
+
 #include "Module.h"
 
 #include <GL/glew.h>
@@ -25,7 +27,7 @@ public:
 	bool CleanUp() override;
 	
 	void CreateFrustumCullingDebugScene() const;
-	
+	ENGINE_API void ToggleRenderAABB() const;
 public:
 	bool show_debug_metrics = true;
 	bool show_bounding_boxes = false;

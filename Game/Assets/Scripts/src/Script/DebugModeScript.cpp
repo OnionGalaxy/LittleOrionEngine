@@ -11,6 +11,7 @@
 #include "Module/ModuleRender.h"
 #include "Module/ModuleScene.h"
 #include "Module/ModuleTime.h"
+#include "Module/ModuleSpacePartitioning.h"
 
 #include "EditorUI/Panel/InspectorSubpanel/PanelComponent.h"
 
@@ -88,6 +89,15 @@ void DebugModeScript::Update()
 		{
 			App->renderer->SetDrawMode(render_wireframe? ModuleRender::DrawMode::WIREFRAME : ModuleRender::DrawMode::SHADED);
 			render_wireframe = !render_wireframe;
+		}
+		
+		if (App->input->GetKeyDown(KeyCode::F8))
+		{
+			if (render_AABB)
+			{
+				App->space_partitioning->DrawAABBTree();
+			}
+		    render_AABB = !render_AABB;
 		}
 	}
 
