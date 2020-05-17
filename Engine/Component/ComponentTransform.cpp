@@ -70,7 +70,6 @@ ENGINE_API float3 ComponentTransform::GetGlobalTranslation() const
 	return global_model_matrix.TranslatePart();
 }
 
-
 ENGINE_API float3 ComponentTransform::GetTranslation() const
 {
 	return translation;
@@ -78,6 +77,7 @@ ENGINE_API float3 ComponentTransform::GetTranslation() const
 
 ENGINE_API void ComponentTransform::SetTranslation(const float3& translation)
 {
+	BROFILER_CATEGORY("SetTranslation", Profiler::Color::Lavender);
 	this->translation = translation;
 	OnTransformChange();
 }
@@ -86,6 +86,12 @@ ENGINE_API void ComponentTransform::Translate(const float3& translation)
 {
 	this->translation += translation;
 	OnTransformChange();
+}
+
+ENGINE_API void ComponentTransform::SetGlobalMatrixTranslation(const float3& translation)
+{
+	global_model_matrix.SetTranslatePart(translation);
+	SetGlobalModelMatrix(global_model_matrix);
 }
 
 ENGINE_API Quat ComponentTransform::GetGlobalRotation() const
@@ -127,6 +133,18 @@ ENGINE_API void ComponentTransform::SetRotation(const Quat& new_rotation)
 	OnTransformChange();
 }
 
+ENGINE_API void ComponentTransform::SetGlobalMatrixRotation(const float3x3& rotation)
+{
+	global_model_matrix.SetRotatePart(rotation);
+	SetGlobalModelMatrix(global_model_matrix);
+}
+
+ENGINE_API void ComponentTransform::SetGlobalMatrixRotation(const Quat& rotation)
+{
+	global_model_matrix.SetRotatePart(rotation);
+	SetGlobalModelMatrix(global_model_matrix);
+}
+
 void ComponentTransform::Rotate(const Quat& rotation)
 {
 	this->rotation = rotation * this->rotation;
@@ -135,8 +153,6 @@ void ComponentTransform::Rotate(const Quat& rotation)
 
 	OnTransformChange();
 }
-
-
 
 void ComponentTransform::Rotate(const float3x3& rotation)
 {
@@ -154,17 +170,21 @@ ENGINE_API void ComponentTransform::LookAt(const float3& target)
 	SetRotation(new_rotation);
 }
 
-float3 ComponentTransform::ComponentTransform::GetScale() const
+ENGINE_API float3 ComponentTransform::ComponentTransform::GetScale() const
 {
 	return scale;
 }
 
-
-void ComponentTransform::SetScale(const float3& scale)
+ENGINE_API void ComponentTransform::SetScale(const float3& scale)
 {
 	this->scale = scale;
 	
 	OnTransformChange();
+}
+
+float3 ComponentTransform::GetGlobalScale() const
+{
+	return global_model_matrix.GetScale();
 }
 
 ENGINE_API float3 ComponentTransform::GetUpVector() const
@@ -185,6 +205,7 @@ ENGINE_API float3 ComponentTransform::GetRightVector() const
 
 void ComponentTransform::OnTransformChange()
 {
+	BROFILER_CATEGORY("OnTransformChange", Profiler::Color::Lavender);
 	model_matrix = float4x4::FromTRS(translation, rotation, scale);
 	GenerateGlobalModelMatrix();
 	for (const auto& child : owner->children)
@@ -201,6 +222,7 @@ float4x4 ComponentTransform::GetModelMatrix() const
 
 void ComponentTransform::GenerateGlobalModelMatrix()
 {
+	BROFILER_CATEGORY("GenerateGlobalMatrix", Profiler::Color::Lavender);
 	if (owner->parent == nullptr)
 	{
 		global_model_matrix = model_matrix;
@@ -235,7 +257,6 @@ void ComponentTransform::SetGlobalModelMatrix(const float4x4& new_global_matrix)
 	SetTranslation(translation);
 	SetRotation(rotation);
 	SetScale(scale);
-	
 }
 
 void ComponentTransform::ChangeLocalSpace(const float4x4& new_local_space)

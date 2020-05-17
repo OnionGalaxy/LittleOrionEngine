@@ -256,6 +256,10 @@
   <ItemGroup>
     <ClInclude Include="src\Script\DamageScript.h" />
     <ClInclude Include="src\Script\DebugModeScript.h" />
+    <ClInclude Include="src\Script\Mushdoom.h" />
+    <ClInclude Include="src\Script\EnemyManager.h" />
+    <ClInclude Include="src\Script\EnemyController.h" />
+    <ClInclude Include="src\Script\PlayerAttack.h" />
     <ClInclude Include="src\Script\EndOfLevelScript.h" />
     <ClInclude Include="src\Script\ExampleScript.h" />
     <ClInclude Include="src\Script\MenuLogic.h" />
@@ -270,6 +274,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Script\DamageScript.cpp" />
+    <ClCompile Include="src\Script\Mushdoom.cpp" />
+    <ClCompile Include="src\Script\EnemyManager.cpp" />
+    <ClCompile Include="src\Script\EnemyController.cpp" />
+    <ClCompile Include="src\Script\PlayerAttack.cpp" />
     <ClCompile Include="src\Script\DebugModeScript.cpp" />
     <ClCompile Include="src\Script\EndOfLevelScript.cpp" />
     <ClCompile Include="src\Script\ExampleScript.cpp" />

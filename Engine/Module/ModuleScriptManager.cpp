@@ -13,8 +13,8 @@
 #include "Script/Script.h"
 
 #include <algorithm>
+#include <Brofiler/Brofiler.h>
 #include <fstream>
-
 
 bool ModuleScriptManager::Init()
 {
@@ -156,20 +156,22 @@ void ModuleScriptManager::LoadScriptList()
 
 void ModuleScriptManager::InitScripts()
 {
-	for (const auto& component_script : scripts)
+	for (size_t i = 0; i < scripts.size(); ++i)
 	{
-		component_script->AwakeScript();
+		scripts[i]->AwakeScript();
 	}
-	for (const auto& component_script : scripts)
+	for (size_t i = 0; i < scripts.size(); ++i)
 	{
-		component_script->StartScript();
+		scripts[i]->StartScript();
 	}
 }
 
 void ModuleScriptManager::RunScripts()
 {
+	BROFILER_CATEGORY("Run Scripts", Profiler::Color::Aqua);
 	for (const auto& component_script : scripts)
 	{
+		BROFILER_CATEGORY("Script", Profiler::Color::Lavender);
 		component_script->Update();
 	}
 }

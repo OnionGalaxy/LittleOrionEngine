@@ -56,12 +56,6 @@ void DebugModeScript::Update()
 		(debug_enabled) ? scene_cameras->SetMainCameraRendering() : scene_cameras->SetMainCameraRendering();
 		debug_enabled = !debug_enabled;
 	}
-}
-
-void DebugModeScript::UpdateImGui(ImGuiContext* context)
-{
-	//Necessary to be able to write with imgui
-	ImGui::SetCurrentContext(context);
 
 	if (debug_enabled)
 	{
