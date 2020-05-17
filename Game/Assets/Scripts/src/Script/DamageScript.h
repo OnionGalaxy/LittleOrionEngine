@@ -26,7 +26,7 @@ private:
 	GameObject* health_bar = nullptr;
 	ComponentProgressBar* health_component = nullptr;
 	float damage = 20.0f;
-
+	
 };
 extern "C" SCRIPT_API DamageScript* DamageScriptDLL(); //This is how we are going to load the script
 #endif

@@ -27,23 +27,12 @@ public:
 	bool render_AABB = false;
 
 private:
-	GameObject* background_go = nullptr;
-	GameObject* text_tris_go = nullptr;
-	GameObject* text_verts_go = nullptr;
-	GameObject* text_fps_go = nullptr;
-	ComponentImage* background = nullptr;
-	ComponentText* text_tris = nullptr;
-	ComponentText* text_verts = nullptr;
-	ComponentText* text_fps = nullptr;
-
 	std::string base_str_tris = "#Tris: ";
 	std::string base_str_verts = "#Verts: ";
 	std::string base_str_fps = "FPS: ";
 
 	GameObject* camera_manager = nullptr;
 	SceneCamerasController* scene_cameras = nullptr;
-
-
 };
 extern "C" SCRIPT_API DebugModeScript* DebugModeScriptDLL(); //This is how we are going to load the script
 #endif
