@@ -29,6 +29,7 @@ public:
 	virtual void Awake() {};
 	virtual void Start() {};
 	virtual void Update() {};
+	virtual void UpdateImGui(ImGuiContext*) {};
 
 	virtual void OnInspector(ImGuiContext*) {};
 

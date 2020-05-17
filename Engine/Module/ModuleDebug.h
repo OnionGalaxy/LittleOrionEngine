@@ -27,7 +27,7 @@ public:
 	bool CleanUp() override;
 	
 	void CreateFrustumCullingDebugScene() const;
-	ENGINE_API void ToggleRenderAABB() const;
+	ENGINE_API void ToggleRenderAABB();
 public:
 	bool show_debug_metrics = true;
 	bool show_bounding_boxes = false;

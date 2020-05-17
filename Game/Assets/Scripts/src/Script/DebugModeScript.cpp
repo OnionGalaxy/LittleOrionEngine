@@ -103,6 +103,19 @@ void DebugModeScript::Update()
 
 }
 
+void DebugModeScript::UpdateImGui(ImGuiContext* context)
+{
+	//Necessary to be able to write with imgui
+	ImGui::SetCurrentContext(context);
+
+	if (ImGui::Begin("Ingame debug"))
+	{
+		ImGui::LabelText("Some text", "Some more text");
+		ImGui::Separator();
+		ImGui::End();
+	}
+}
+
 // Use this for showing variables on inspector
 void DebugModeScript::OnInspector(ImGuiContext* context)
 {
