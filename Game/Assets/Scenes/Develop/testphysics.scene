@@ -33,50 +33,20 @@
                     "OriginalUUID": 1502684121
                 }
             ]
-        },
-        {
-            "ParentUUID": 1754673839,
-            "Prefab": 197215350,
-            "Transform": {
-                "UUID": 3586664889,
-                "ComponentType": 3,
-                "Active": true,
-                "Translation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "Rotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "Scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "UUIDS": [
-                {
-                    "UUID": 2277711832,
-                    "OriginalUUID": 197215350
-                },
-                {
-                    "UUID": 2172338569,
-                    "OriginalUUID": 197215352
-                },
-                {
-                    "UUID": 3868804063,
-                    "OriginalUUID": 197215351
-                }
-            ]
         }
     ],
     "PrefabsComponents": [
         {
             "RemovedComponents": [],
             "Components": [
+                {
+                    "UUID": 2497101326,
+                    "ComponentType": 2,
+                    "Active": false,
+                    "Mesh": 3348717978,
+                    "Material": 1582005317,
+                    "Skeleton": 0
+                },
                 {
                     "UUID": 1620941565,
                     "ComponentType": 2,
@@ -106,7 +76,7 @@
                     "Active_Physics": true,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
-                    "Center_deviation": [
+                    "Center": [
                         0.0,
                         0.0,
                         0.0
@@ -302,7 +272,7 @@
                 "Active": true,
                 "Translation": [
                     0.0,
-                    8.444000244140625,
+                    12.594401359558106,
                     23.474212646484376
                 ],
                 "Rotation": [
@@ -354,23 +324,6 @@
             "Transform2DEnabled": false,
             "Components": [
                 {
-                    "UUID": 219636647,
-                    "ComponentType": 6,
-                    "Active": true,
-                    "ScriptName": "PlayerController",
-                    "Player": 1
-                },
-                {
-                    "UUID": 405185649,
-                    "ComponentType": 6,
-                    "Active": true,
-                    "ScriptName": "PlayerMovement",
-                    "Name0": "Main Camera",
-                    "Main Camera": 172714554,
-                    "Name1": "GameObject (2)",
-                    "GameObject (2)": 1754673839
-                },
-                {
                     "UUID": 2114681802,
                     "ComponentType": 9,
                     "Active": true,
@@ -391,9 +344,9 @@
                     "Active_Physics": true,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
-                    "Center_deviation": [
+                    "Center": [
                         0.0,
-                        0.800000011920929,
+                        0.8100000023841858,
                         0.0
                     ]
                 }
@@ -483,7 +436,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
-                    "Center_deviation": [
+                    "Center": [
                         0.0,
                         0.0,
                         0.0

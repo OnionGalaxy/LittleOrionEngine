@@ -106,6 +106,7 @@ public:
 	bool freeze_rotation_z = true;
 
 	bool active_physics = true;
+	bool manual_movement = true;
 
 protected:
 	friend class PanelComponent;
