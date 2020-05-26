@@ -298,7 +298,7 @@ void PanelConfiguration::ShowTimeOptions()
 {
 	if (ImGui::CollapsingHeader(ICON_FA_CLOCK " Timers"))
 	{
-		ImGui::Checkbox("", &App->time->limit_fps);
+		ImGui::Checkbox("###Limit FPS", &App->time->limit_fps);
 
 		ImGui::SameLine();
 

@@ -52,6 +52,8 @@ update_status ModulePhysics::Update()
 	//update the world
 	world->stepSimulation(App->time->delta_time, 2);
 
+	//float3 distance = gravity * App->time->delta_time * App->time->delta_time;
+
 	if (show_physics)
 	{
 		world->debugDrawWorld();
@@ -59,12 +61,27 @@ update_status ModulePhysics::Update()
 		
 	for (auto collider : colliders)
 	{
-
-		if (App->time->isGameRunning() && collider->active_physics && collider->IsEnabled())
+		if (App->time->isGameRunning() && collider->active_physics && collider->IsEnabled()
+			&& collider->collider_type != ComponentCollider::ColliderType::MESH)
 		{
-			if (collider->collider_type != ComponentCollider::ColliderType::MESH)
+			if (collider->manual_movement)
 			{
-				collider->MoveBody();
+				// fake gravity
+				float3 last_position = collider->owner->transform.GetGlobalTranslation();
+				if (!collider->is_static && collider->detect_collision)
+				{
+					collider->owner->transform.SetGlobalMatrixTranslation(last_position + gravity);
+					collider->UpdateDimensions();
+					if (collider->DetectCollision())
+					{
+						collider->owner->transform.SetGlobalMatrixTranslation(last_position);
+						collider->UpdateDimensions();
+					}
+				}
+			}
+			else
+			{
+				//collider->MoveBody();
 			}
 		}
 		else
