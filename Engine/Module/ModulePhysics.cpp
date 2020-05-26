@@ -59,7 +59,7 @@ update_status ModulePhysics::Update()
 		
 	for (auto collider : colliders)
 	{
-		
+
 		if (App->time->isGameRunning() && collider->active_physics && collider->IsEnabled())
 		{
 			if (collider->collider_type != ComponentCollider::ColliderType::MESH)

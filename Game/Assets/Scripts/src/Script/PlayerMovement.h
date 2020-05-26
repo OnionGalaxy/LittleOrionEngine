@@ -34,9 +34,10 @@ public:
 	ComponentCollider* collider = nullptr;
 
 private:
-	float speed = 0.2f;
-	float jump_power = 130.0f;
+	float speed = 0.005f;
+	float jump_power = 0.02f;
 	float second_jump_factor = -1000.f;
+	float y_velocity = 0.0f;
 
 	bool is_grounded = false;
 	bool is_second_jump = false;

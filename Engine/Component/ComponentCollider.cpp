@@ -339,7 +339,7 @@ void ComponentCollider::SetRotationAxis()
 
 void ComponentCollider::AddForce(float3& force)
 {
-	body->applyCentralForce(btVector3(force.x, force.y, force.z));
+	/*body->applyCentralForce(btVector3(force.x, force.y, force.z));
 
 	
 	if (abs(force.x) > 0 || abs(force.z) > 0) {
@@ -353,6 +353,17 @@ void ComponentCollider::AddForce(float3& force)
 		transrot = btQuaternion(new_rotation.x, new_rotation.y, new_rotation.z, new_rotation.w);
 		trans.setRotation(transrot);
 		body->setWorldTransform(trans);
+	}*/
+
+	float3 transform = owner->transform.GetTranslation();
+	
+
+	if (!force.Equals(float3::zero))
+	{
+		float3 dir;
+		float3 direction = force + transform;
+		owner->transform.SetTranslation(direction);
+
 	}
 }
 
@@ -366,7 +377,10 @@ ENGINE_API bool ComponentCollider::RaycastHit(btVector3& origin, btVector3& end)
 {
 	//Vector normal to the surface
 	btVector3 normal;
+
+	
 	return App->physics->RaycastWorld(origin, end, normal);
+	/*return App->physics->RaycastWorld(origin, end, normal);*/
 }
 
 
@@ -416,39 +430,34 @@ float3 ComponentCollider::GetColliderCenter() const
 
 void ComponentCollider::SetVelocity(float3& velocity, float speed)
 {
+
+	float3 transform = owner->transform.GetTranslation();
+	float3 rotation = owner->transform.GetRotationRadiants();
+
 	//bottom of the model
 	btVector3 bottom = body->getWorldTransform().getOrigin();
-	bottom.setY(bottom.getY() - (5 * box_size.getY()));
+	bottom.setY(bottom.getY() - 200 * box_size.getY());
 
 	//Vector normal to the surface
-	btVector3 Normal; 
+	btVector3 Normal;
 	App->physics->RaycastWorld(body->getWorldTransform().getOrigin(), bottom, Normal);
 	float3 normal = float3(Normal);
 	normal.Normalize();
 
 	float2 normal_2D = float2(normal.x, normal.y);
 	float2 vector_vel = normal_2D.Perp();
-	
-	if (velocity.Length() > 0) 
+
+	if (abs(velocity.x) > 0 || abs(velocity.z) > 0)
 	{
 		velocity.Normalize();
-		body->setLinearVelocity(speed * btVector3(velocity.x, -SignOrZero(velocity.x)* SignOrZero(normal.x)*abs(vector_vel.y), velocity.z));
+		float3 dir;
+		float3 direction = velocity * speed + transform;
+		owner->transform.LookAt(direction);
+		direction = transform + speed * float3(velocity.x, -SignOrZero(velocity.x)* SignOrZero(normal.x)*abs(vector_vel.y), velocity.z);
 		
-		
-		//rotate collider
-		float3 direction = velocity.Normalized();
-		Quat new_rotation = Quat::LookAt(owner->transform.GetFrontVector(), direction, owner->transform.GetUpVector(), float3::unitY);
-		
-		btTransform trans = body->getWorldTransform();
+		owner->transform.SetTranslation(direction);
 
-		btQuaternion quat = trans.getRotation();
-		btQuaternion transrot = btQuaternion(new_rotation.x, new_rotation.y, new_rotation.z, new_rotation.w);
-		quat *= transrot;
-		trans.setRotation(quat);
-		body->setWorldTransform(trans);
-		
 	}
-	
 }
 
 void ComponentCollider::SetVelocityEnemy(float3 & velocity, float speed)
