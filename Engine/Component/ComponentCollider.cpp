@@ -339,23 +339,7 @@ void ComponentCollider::SetRotationAxis()
 
 void ComponentCollider::AddForce(float3& force)
 {
-	/*body->applyCentralForce(btVector3(force.x, force.y, force.z));
-
-	
-	if (abs(force.x) > 0 || abs(force.z) > 0) {
-
-		float3 direction = float3(force.x, 0, force.z);
-		Quat new_rotation = owner->transform.GetRotation().LookAt(float3::unitZ, direction.Normalized(), float3::unitY, float3::unitY);
-
-		btTransform trans = body->getWorldTransform();
-		btQuaternion transrot = trans.getRotation();
-
-		transrot = btQuaternion(new_rotation.x, new_rotation.y, new_rotation.z, new_rotation.w);
-		trans.setRotation(transrot);
-		body->setWorldTransform(trans);
-	}*/
-
-	float3 transform = owner->transform.GetTranslation();
+	/*float3 transform = owner->transform.GetTranslation();
 	
 
 	if (!force.Equals(float3::zero))
@@ -364,7 +348,7 @@ void ComponentCollider::AddForce(float3& force)
 		float3 direction = force + transform;
 		owner->transform.SetTranslation(direction);
 
-	}
+	}*/
 }
 
 void ComponentCollider::SwitchPhysics(bool active)
@@ -432,7 +416,6 @@ void ComponentCollider::SetVelocity(float3& velocity, float speed)
 {
 
 	float3 transform = owner->transform.GetTranslation();
-	float3 rotation = owner->transform.GetRotationRadiants();
 
 	//bottom of the model
 	btVector3 bottom = body->getWorldTransform().getOrigin();
@@ -446,18 +429,24 @@ void ComponentCollider::SetVelocity(float3& velocity, float speed)
 
 	float2 normal_2D = float2(normal.x, normal.y);
 	float2 vector_vel = normal_2D.Perp();
-
+	vector_vel.Normalize();
 	if (abs(velocity.x) > 0 || abs(velocity.z) > 0)
 	{
 		velocity.Normalize();
-		float3 dir;
-		float3 direction = velocity * speed + transform;
-		owner->transform.LookAt(direction);
-		direction = transform + speed * float3(velocity.x, -SignOrZero(velocity.x)* SignOrZero(normal.x)*abs(vector_vel.y), velocity.z);
-		
-		owner->transform.SetTranslation(direction);
+		float3 orientation = velocity * speed + transform;
+		owner->transform.LookAt(orientation);
 
+		
+		float3 direction = transform + speed * float3(velocity.x, -SignOrZero(velocity.x)* SignOrZero(normal.x)*abs(vector_vel.y), velocity.z);
+
+	
+		if (!App->physics->RaycastWorld(body->getWorldTransform().getOrigin()+btVector3(0, box_size.getY()/2, 0), btVector3(direction.x +SignOrZero(direction.x), body->getWorldTransform().getOrigin().getY()+abs(vector_vel.y), direction.z + SignOrZero(direction.z))+btVector3(0, box_size.getY() / 2, 0), Normal))
+		{
+			owner->transform.SetGlobalMatrixTranslation(direction);
+			UpdateDimensions();
+		}
 	}
+	
 }
 
 void ComponentCollider::SetVelocityEnemy(float3 & velocity, float speed)

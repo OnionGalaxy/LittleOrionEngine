@@ -879,13 +879,16 @@ bool PanelComponent::ShowCommonColliderWindow(ComponentCollider* collider)
 	{
 		collider->SetStatic();
 	}
-	if (ImGui::Checkbox("Collision Detection", &collider->detect_collision))
+	if (ImGui::Checkbox("Bullet Collision Animation", &collider->detect_collision))
 	{
 		collider->SetCollisionDetection();
 	}
-	if (ImGui::Checkbox("Active Physics", &collider->active_physics))
+	if (ImGui::Checkbox("Active Bullet Physics", &collider->active_physics))
 	{
 		collider->SwitchPhysics();
+	}
+	if (ImGui::Checkbox("Manual movement", &collider->manual_movement))
+	{
 	}
 	ImGui::Text("Freeze Axis Rotation");
 	if (ImGui::Checkbox("X Axis", &collider->freeze_rotation_x))

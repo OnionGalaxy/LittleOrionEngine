@@ -92,6 +92,7 @@ public:
 
 	float friction = 1.0F;
 	float rolling_friction = 1.0F;
+	float jump_motion = 0;
 
 	float3 center = float3::zero;
 

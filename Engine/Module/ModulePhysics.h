@@ -62,6 +62,7 @@ public:
 	btDiscreteDynamicsWorld* world = nullptr;
 
 	bool show_physics = true;
+	bool simulated = false;
 
 	Timer* physics_timer = nullptr;
 	float ms = 0;

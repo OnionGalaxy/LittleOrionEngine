@@ -78,20 +78,12 @@ void PlayerMovement::OnInspector(ImGuiContext* context)
 void PlayerMovement::Move(int player)
 {
 
-	velocity = collider->GetCurrentVelocity();
 	float3 transform = owner->transform.GetGlobalTranslation();
 	direction = float3::zero; 
 	PlayerID player_id = static_cast<PlayerID>(player - 1);
 
 	float x_axis = App->input->GetHorizontal(player_id);
 	float y_axis = App->input->GetVertical(player_id);
-	
-	
-	/*if (abs(velocity.y) < 0.01 && is_jumping)
-	{
-		is_jumping = false;
-		is_second_jump = false;
-	}*/
 
 	direction = float3(x_axis, 0.0f, y_axis);
 	if (IsGrounded() && !is_jumping)
@@ -111,7 +103,7 @@ void PlayerMovement::Move(int player)
 				direction.x = direction.x * -speed;
 				direction.z = direction.z * -speed;
 				collider->AddForce(direction);
-				collider->SetVelocity(direction, -speed);
+				collider->SetVelocity(direction, -speed * App->time->delta_time);
 			}
 		}
 		else
@@ -121,6 +113,7 @@ void PlayerMovement::Move(int player)
 		
 		if (App->input->GetGameInputDown("Jump", player_id) && is_inside)
 		{
+			
 			is_jumping = true;
 			y_velocity = jump_power;
 			Jump(direction);
@@ -129,11 +122,6 @@ void PlayerMovement::Move(int player)
 	}
 	else
 	{
-		is_grounded = IsGrounded();
-		is_jumping = !IsGrounded();
-		
-		y_velocity += (App->physics->gravity.y / 10000.0f);
-		Jump(direction);
 		if (!direction.Equals(float3::zero))
 		{
 			is_inside = IsInside(transform + direction * speed);
@@ -141,7 +129,7 @@ void PlayerMovement::Move(int player)
 			if (is_inside)
 			{
 				direction *= App->time->delta_time * speed;
-				
+				collider->SetVelocity(direction, speed * App->time->delta_time);
 			}
 			else
 			{
@@ -154,75 +142,11 @@ void PlayerMovement::Move(int player)
 		{
 			is_second_jump = true;
 			direction.y = second_jump_factor;
-			Jump(direction);
+			/*Jump(direction);*/
 		}
 
 	}
-	//if (abs(velocity.y) < 0.01 && is_jumping)
-	//{
-	//	is_jumping = false;
-	//	is_second_jump = false;
-	//}
-
-	//direction = float3(x_axis, 0.0f, y_axis);
-	//if (IsGrounded() && !is_jumping)
-	//{
-	//	is_grounded = true;
-	//	is_inside = IsInside(transform + direction * speed);
-	//	if (!direction.Equals(float3::zero))
-	//	{
-	//		if (is_inside)
-	//		{
-	//			collider->SetVelocity(direction, speed * App->time->delta_time);
-	//			animation->ActiveAnimation("run");
-	//		}
-	//		else
-	//		{
-	//			//direction = float3::zero;
-	//			direction.x = direction.x * -speed;
-	//			direction.z = direction.z * -speed;
-	//			collider->AddForce(direction);
-	//			collider->SetVelocity(direction, -speed);
-	//		}
-	//	}
-	//	else
-	//	{
-	//		animation->ActiveAnimation("idle");
-	//	}
-	//	
-	//	if (App->input->GetGameInputDown("Jump", player_id) && is_inside)
-	//	{
-	//		is_jumping = true;
-	//		Jump(direction);
-	//	}
-	//	
-	//}
-	//else
-	//{
-	//	is_grounded = false;
-	//	if (!direction.Equals(float3::zero))
-	//	{
-	//		is_inside = IsInside(transform + direction * speed);
-
-	//		if (is_inside)
-	//		{
-	//			direction *= App->time->delta_time * speed;
-	//			collider->AddForce(direction);
-	//		}
-	//		else
-	//		{
-	//			direction = float3::zero;
-	//			collider->AddForce(direction);
-	//			collider->SetVelocity(transform, 0);
-	//		}
-	//	}
-	//	if (App->input->GetGameInputDown("Jump", player_id) && !is_second_jump)
-	//	{
-	//		is_second_jump = true;
-	//		direction.y = second_jump_factor;
-	//		Jump(direction);
-	//	}
-	//}
+	
 
 	//TODO: move to where the move animation is confirmed to be playing and character is moving
 	/*
