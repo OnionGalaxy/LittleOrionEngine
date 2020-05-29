@@ -52,6 +52,7 @@ update_status ModulePhysics::Update()
 	//update the world
 	world->stepSimulation(App->time->delta_time, 2);
 
+	
 	//float3 distance = gravity * App->time->delta_time * App->time->delta_time;
 
 	if (show_physics)
@@ -64,38 +65,11 @@ update_status ModulePhysics::Update()
 		if (App->time->isGameRunning() && collider->active_physics && collider->IsEnabled()
 			&& collider->collider_type != ComponentCollider::ColliderType::MESH)
 		{
-			collider->MoveBody();
+			collider->UpdatePosition();
 		}
 		else
 		{	
-			if (App->time->isGameRunning()) {
-				
-				if (collider->manual_movement)
-				{
-					// fake gravity
-					float3 last_position = collider->owner->transform.GetGlobalTranslation();
-					if (!collider->is_static)
-					{
-		
-						collider->owner->transform.SetGlobalMatrixTranslation(last_position + gravity);
-						collider->UpdateDimensions();
-						
-						if (collider->DetectCollision())
-						{
-							collider->owner->transform.SetGlobalMatrixTranslation(last_position);
-							collider->UpdateDimensions();
-						}
-					}
-				}
-				else {
-					collider->UpdateDimensions();
-				}
-			
-			}
-			else {
-				collider->UpdateDimensions();
-			}
-					
+			collider->UpdateDimensions();				
 		}
 
 		if(collider->collider_type != ComponentCollider::ColliderType::MESH)
@@ -117,6 +91,7 @@ update_status ModulePhysics::Update()
 		ms_info[99] = ms2 - ms;
 	}
 	
+
 	return update_status::UPDATE_CONTINUE;
 }
 
@@ -210,7 +185,7 @@ bool ModulePhysics::RaycastWorld(const btVector3 &Start, btVector3 &End, btVecto
 	btCollisionWorld::ClosestRayResultCallback RayCallback(Start, End);
 	//btCollisionWorld::RayResultCallback RayCallback(Start, End);
 	//Magic Line for not jumping on enemies
-	/*RayCallback.m_collisionFilterMask = btBroadphaseProxy::StaticFilter;*/
+	RayCallback.m_collisionFilterMask = btBroadphaseProxy::StaticFilter;
 	
 	world->rayTest(Start, End, RayCallback);
 	if (RayCallback.hasHit())

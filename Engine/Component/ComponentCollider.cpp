@@ -3,6 +3,7 @@
 #include "Main/Application.h"
 #include "Main/GameObject.h"
 #include "Module/ModulePhysics.h"
+#include "Module/ModuleTime.h"
 
 ComponentCollider::ComponentCollider(ColliderType collider_type) : Component(ComponentType::COLLIDER), collider_type(collider_type)
 {
@@ -247,11 +248,12 @@ bool ComponentCollider::DetectCollision()
 		btPersistentManifold* contactManifold = App->physics->world->getDispatcher()->getManifoldByIndexInternal(i);
 		const btCollisionObject* obA = contactManifold->getBody0();
 		const btCollisionObject* obB = contactManifold->getBody1();
-
+		
 		int numContacts = contactManifold->getNumContacts();
 		for (int j = 0; j < numContacts; j++)
 		{
 			btManifoldPoint pt = contactManifold->getContactPoint(j);
+			
 			if (obA->getWorldArrayIndex() == body->getWorldArrayIndex() || obB->getWorldArrayIndex() == body->getWorldArrayIndex())
 			{
 				if (pt.getDistance() < 0.0f)
@@ -312,6 +314,26 @@ bool ComponentCollider::DetectCollisionWith(ComponentCollider * collider)
 	return false;
 }
 
+bool ComponentCollider::DetectCollisionWithEnemies()
+{
+	for (auto collider : App->physics->colliders)
+	{
+		if (collider->DetectCollisionWith(this) && collider->collider_type != ComponentCollider::ColliderType::MESH && this->body->getWorldArrayIndex() != collider->body->getWorldArrayIndex()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool ComponentCollider::IsGrounded()
+{
+	btVector3 origin = body->getWorldTransform().getOrigin();
+	btVector3 end = body->getWorldTransform().getOrigin();
+	end.setY(end.getY() - box_size.getY());
+
+	return RaycastHit(origin, end);
+}
+
 ENGINE_API void ComponentCollider::ClearForces() const
 {
 	body->clearForces();
@@ -339,16 +361,8 @@ void ComponentCollider::SetRotationAxis()
 
 void ComponentCollider::AddForce(float3& force)
 {
-	/*float3 transform = owner->transform.GetTranslation();
-	
-
-	if (!force.Equals(float3::zero))
-	{
-		float3 dir;
-		float3 direction = force + transform;
-		owner->transform.SetTranslation(direction);
-
-	}*/
+	velocity.x = force.x;
+	velocity.z = force.z;
 }
 
 void ComponentCollider::SwitchPhysics(bool active)
@@ -386,6 +400,70 @@ void ComponentCollider::UpdateFriction()
 	body->setFriction(friction);
 }
 
+void ComponentCollider::UpdatePosition()
+{
+	//raycast
+	//bottom of the model
+	btVector3 bottom = body->getWorldTransform().getOrigin();
+	bottom.setY(bottom.getY() - 5 * box_size.getY());
+
+	//Vector normal to the surface
+	btVector3 Normal;
+	bool ground = App->physics->RaycastWorld(body->getWorldTransform().getOrigin(), bottom, Normal);
+	float3 normal = float3(Normal);
+	normal.Normalize();
+
+	float2 normal_2D = float2(normal.x, normal.y);
+	float2 vector_vel = normal_2D.Perp();
+	//
+
+	//move
+	btTransform m_transform = body->getWorldTransform();
+	float3 transform = float3(body->getWorldTransform().getOrigin());
+	if (velocity.Length() > 0)
+	{
+		float3 aux = velocity;
+		aux.Normalize();
+		
+		if (velocity.y <= 0) 
+		{
+			direction = transform + speed * float3(aux.x, -SignOrZero(aux.x)* SignOrZero(normal.x)*abs(vector_vel.y), aux.z);
+		}
+		else 
+		{
+			direction = transform + float3(speed*aux.x, velocity.y, speed*aux.z);
+			velocity.y +=  App->physics->gravity.y/1000.0f;
+
+			if (velocity.y <= 0) 
+			{
+				velocity.y = 0;
+			}
+		}
+		//
+		//rotation
+		float3 direction = float3(velocity.x, 0, velocity.z);
+		Quat new_rotation = owner->transform.GetRotation().LookAt(float3::unitZ, direction.Normalized(), float3::unitY, float3::unitY);
+		btQuaternion transrot = m_transform.getRotation();
+		transrot = btQuaternion(new_rotation.x, new_rotation.y, new_rotation.z, new_rotation.w);
+		m_transform.setRotation(transrot);
+		//
+	}
+	else {
+		direction = float3(body->getWorldTransform().getOrigin());
+	}
+
+	if (!is_static)
+	{
+		//update
+		btVector3 origin = btVector3(direction.x, direction.y, direction.z);
+		m_transform.setOrigin(origin);
+		body->setWorldTransform(m_transform);
+	}
+	MoveBody();
+	velocity.x = 0;
+	velocity.z = 0;
+}
+
 void ComponentCollider::SetRollingFriction()
 {
 	body->setRollingFriction(rolling_friction);
@@ -414,38 +492,8 @@ float3 ComponentCollider::GetColliderCenter() const
 
 void ComponentCollider::SetVelocity(float3& velocity, float speed)
 {
-
-	float3 transform = owner->transform.GetTranslation();
-
-	//bottom of the model
-	btVector3 bottom = body->getWorldTransform().getOrigin();
-	bottom.setY(bottom.getY() - 200 * box_size.getY());
-
-	//Vector normal to the surface
-	btVector3 Normal;
-	App->physics->RaycastWorld(body->getWorldTransform().getOrigin(), bottom, Normal);
-	float3 normal = float3(Normal);
-	normal.Normalize();
-
-	float2 normal_2D = float2(normal.x, normal.y);
-	float2 vector_vel = normal_2D.Perp();
-	vector_vel.Normalize();
-	if (abs(velocity.x) > 0 || abs(velocity.z) > 0)
-	{
-		velocity.Normalize();
-		float3 orientation = velocity * speed + transform;
-		owner->transform.LookAt(orientation);
-
-		
-		float3 direction = transform + speed * float3(velocity.x, -SignOrZero(velocity.x)* SignOrZero(normal.x)*abs(vector_vel.y), velocity.z);
-
-	
-		if (!App->physics->RaycastWorld(body->getWorldTransform().getOrigin()+btVector3(0, box_size.getY()/2, 0), btVector3(direction.x +SignOrZero(direction.x), body->getWorldTransform().getOrigin().getY()+abs(vector_vel.y), direction.z + SignOrZero(direction.z))+btVector3(0, box_size.getY() / 2, 0), Normal))
-		{
-			owner->transform.SetGlobalMatrixTranslation(direction);
-			UpdateDimensions();
-		}
-	}
+	this->velocity = velocity;
+	this->speed = speed;
 	
 }
 

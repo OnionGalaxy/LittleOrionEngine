@@ -54,6 +54,8 @@ public:
 	ENGINE_API void SetCollisionDetection();
 	ENGINE_API bool DetectCollision(); //returns true if collides with any object in the world
 	ENGINE_API bool DetectCollisionWith(ComponentCollider* collider); //returns true if collides with a concrete object
+	bool DetectCollisionWithEnemies();
+	bool IsGrounded();
 
 	ENGINE_API void ClearForces() const;
 	void SetStatic();
@@ -63,12 +65,14 @@ public:
 	void SwitchPhysics();
 
 	void UpdateFriction();
+	void UpdatePosition();
 
 	void SetRollingFriction();
 	void SetConfiguration();
 
 	void SetColliderCenter(float3& new_center);
 	float3 GetColliderCenter() const;
+	
 	
 
 protected:
@@ -95,7 +99,8 @@ public:
 	float jump_motion = 0;
 
 	float3 center = float3::zero;
-
+	float y_deviation = 0.0f;
+	bool moved = false;
 	bool visualize = true;
 
 	bool detect_collision = true;
@@ -107,7 +112,13 @@ public:
 	bool freeze_rotation_z = true;
 
 	bool active_physics = true;
-	bool manual_movement = true;
+	
+
+	float3 orientation = float3::zero;
+	float3 direction;
+	float3 velocity = float3::zero;
+	float speed = 0.0f;
+	
 
 protected:
 	friend class PanelComponent;
