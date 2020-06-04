@@ -582,7 +582,7 @@
             "RemovedComponents": [],
             "Components": [
                 {
-                    "UUID": 3352610777,
+                    "UUID": 2876420983,
                     "ComponentType": 2,
                     "Active": false,
                     "Mesh": 40916008,
@@ -610,7 +610,7 @@
                     ],
                     "Static": false,
                     "Collision": true,
-                    "Visualize": true,
+                    "Visualize": false,
                     "Attached": false,
                     "Freeze_rotation_x": true,
                     "Freeze_rotation_y": true,
@@ -857,8 +857,8 @@
                 "ComponentType": 7,
                 "Active": true,
                 "AnchoredPos": [
-                    752.0,
-                    351.5
+                    624.0,
+                    281.5
                 ],
                 "Rotation": [
                     0.0,
@@ -879,8 +879,8 @@
                     0.5
                 ],
                 "SizeDelta": [
-                    1504.0,
-                    703.0
+                    1248.0,
+                    563.0
                 ],
                 "Pivot": [
                     0.5,
@@ -1580,9 +1580,9 @@
                 "ComponentType": 3,
                 "Active": true,
                 "Translation": [
-                    -91.92992401123047,
-                    0.38957250118255618,
-                    -3.4969983100891115
+                    242.24671936035157,
+                    1.3404773473739625,
+                    -18.989561080932618
                 ],
                 "Rotation": [
                     -0.0,
@@ -1683,13 +1683,13 @@
                         1.0
                     ],
                     "Static": false,
-                    "Collision": true,
+                    "Collision": false,
                     "Visualize": true,
                     "Attached": true,
                     "Freeze_rotation_x": true,
                     "Freeze_rotation_y": true,
                     "Freeze_rotation_z": true,
-                    "Active_Physics": true,
+                    "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
                     "Center": [

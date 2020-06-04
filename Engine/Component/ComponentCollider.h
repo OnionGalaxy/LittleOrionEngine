@@ -54,8 +54,6 @@ public:
 	ENGINE_API void SetCollisionDetection();
 	ENGINE_API bool DetectCollision(); //returns true if collides with any object in the world
 	ENGINE_API bool DetectCollisionWith(ComponentCollider* collider); //returns true if collides with a concrete object
-	bool DetectCollisionWithEnemies();
-	bool IsGrounded();
 
 	ENGINE_API void ClearForces() const;
 	void SetStatic();
@@ -72,7 +70,7 @@ public:
 
 	void SetColliderCenter(float3& new_center);
 	float3 GetColliderCenter() const;
-	
+	bool IsGrounded();
 	
 
 protected:
@@ -102,7 +100,7 @@ public:
 	float y_deviation = 0.0f;
 	bool moved = false;
 	bool visualize = true;
-
+	bool grounded = false;
 	bool detect_collision = true;
 	bool is_attached = false;
 	bool is_static = false;
@@ -112,7 +110,7 @@ public:
 	bool freeze_rotation_z = true;
 
 	bool active_physics = true;
-	
+	bool manual_movement = false;
 
 	float3 orientation = float3::zero;
 	float3 direction;

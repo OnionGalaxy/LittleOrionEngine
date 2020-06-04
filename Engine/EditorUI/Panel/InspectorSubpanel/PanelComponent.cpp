@@ -889,6 +889,9 @@ bool PanelComponent::ShowCommonColliderWindow(ComponentCollider* collider)
 	{
 		collider->SwitchPhysics();
 	}
+	if (ImGui::Checkbox("Manual movement", &collider->manual_movement))
+	{
+	}
 	ImGui::Text("Freeze Axis Rotation");
 	if (ImGui::Checkbox("X Axis", &collider->freeze_rotation_x))
 	{

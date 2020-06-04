@@ -57,11 +57,16 @@ update_status ModulePhysics::Update()
 		if (App->time->isGameRunning() && collider->active_physics && collider->IsEnabled()
 			&& collider->collider_type != ComponentCollider::ColliderType::MESH)
 		{
-			collider->UpdatePosition();
+			collider->MoveBody();
 		}
 		else
 		{	
-			collider->UpdateDimensions();				
+			if (App->time->isGameRunning() && collider->manual_movement) {
+				collider->UpdatePosition();
+			}
+			else {
+				collider->UpdateDimensions();
+			}
 		}
 
 		if(collider->collider_type != ComponentCollider::ColliderType::MESH)
