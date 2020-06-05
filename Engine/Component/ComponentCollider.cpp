@@ -81,6 +81,7 @@ void ComponentCollider::SpecializedSave(Config & config) const
 	config.AddBool(active_physics, "Active_Physics");
 	config.AddFloat(friction, "Friction");
 	config.AddFloat(rolling_friction, "Rolling_friction");
+	config.AddBool(manual_movement, "manual_movement");
 	config.AddFloat3(center, "Center");
 }
 
@@ -99,6 +100,7 @@ void ComponentCollider::SpecializedLoad(const Config & config)
 	friction = config.GetFloat("Friction", 1.0F);
 	rolling_friction = config.GetFloat("Rolling_friction", 1.0F);
 	config.GetFloat3("Center", center, float3::zero);
+	config.GetBool("manual_movement", false);
 	AddBody();
 	SetConfiguration();
 
@@ -399,43 +401,64 @@ void ComponentCollider::UpdatePosition()
 	IsGrounded();
 	if (velocity.Length() >0)
 	{
-		/*velocity.Normalize();*/
-		
+	
 		float3 orientation = float3(velocity.x, 0, velocity.z) * speed + transform;
 		owner->transform.LookAt(orientation);
 
 		float3 direction = transform + speed * float3(velocity.x, -SignOrZero(velocity.x)* SignOrZero(normal.x)*abs(vector_vel.y), velocity.z);
-
-		btVector3 horizontal_ray = btVector3(direction.x - SignOrZero(body->getWorldTransform().getOrigin().getX() - direction.x), body->getWorldTransform().getOrigin().getY() + abs(vector_vel.y), direction.z - SignOrZero(body->getWorldTransform().getOrigin().getZ() - direction.z));
-		bool touched = App->physics->RaycastWorld(body->getWorldTransform().getOrigin(), horizontal_ray, Normal);
-		if (velocity.x == 0 && velocity.z == 0) { touched = false; }
-		if (!touched || (touched && body->getWorldTransform().getOrigin().distance(horizontal_ray) > 2))
+		btVector3 horizontal_ray;
+		if (grounded) 
 		{
-			if (grounded && velocity.y==0) {
+			horizontal_ray = btVector3(direction.x - SignOrZero(body->getWorldTransform().getOrigin().getX() - direction.x), body->getWorldTransform().getOrigin().getY() + abs(vector_vel.y), direction.z - SignOrZero(body->getWorldTransform().getOrigin().getZ() - direction.z));
+		}
+		else {
+			horizontal_ray = btVector3(direction.x - SignOrZero(body->getWorldTransform().getOrigin().getX() - direction.x), body->getWorldTransform().getOrigin().getY(), direction.z - SignOrZero(body->getWorldTransform().getOrigin().getZ() - direction.z));
+		}
+		bool touched = App->physics->RaycastWorld(body->getWorldTransform().getOrigin()+ btVector3(0, box_size.getY()/4, 0), horizontal_ray, Normal);
+		if (!touched || (touched && body->getWorldTransform().getOrigin().distance(horizontal_ray) > 2)) {
+			touched = App->physics->RaycastWorld(body->getWorldTransform().getOrigin() - btVector3(0, box_size.getY() / 4, 0), horizontal_ray, Normal);
+		}
+		if (velocity.x == 0 && velocity.z == 0) { touched = false; }
+		if (!touched || (grounded && touched && body->getWorldTransform().getOrigin().distance(horizontal_ray) > 2))
+		{
+			if (grounded && velocity.y==0) 
+			{
 				btVector3 final_pos = btVector3(direction.x, direction.y - 3 * box_size.getY(), direction.z);
 				App->physics->RaycastWorld(btVector3(direction.x, direction.y + box_size.getY(), direction.z), final_pos, Normal);
-				if (abs(final_pos.getY() - transform.y) < 1) {
+				
+				if (abs(final_pos.getY() - transform.y) < 1) 
+				{
 					owner->transform.SetGlobalMatrixTranslation(float3(direction.x, final_pos.getY(), direction.z));
 				}
-				else {
+				else 
+				{
 					owner->transform.SetGlobalMatrixTranslation(float3(direction.x, transform.y, direction.z));
 				}
 				UpdateDimensions();
 			}
-			else {
-				if (!grounded || velocity.y > 0) {
-					btVector3 vertical_ray = btVector3(direction.x, body->getWorldTransform().getOrigin().getY() + velocity.y + SignOrZero(velocity.y), direction.z);
-					bool touched = App->physics->RaycastWorld(body->getWorldTransform().getOrigin(), vertical_ray, Normal);
-					if (!touched || (touched && abs(vertical_ray.getY()- (body->getWorldTransform().getOrigin().getY()+velocity.y))> 0.3 )) {
+			else 
+			{
+				if (!grounded || velocity.y > 0) 
+				{
+					btVector3 vertical_ray = btVector3(body->getWorldTransform().getOrigin().getX(), body->getWorldTransform().getOrigin().getY() + velocity.y + 2*SignOrZero(velocity.y), body->getWorldTransform().getOrigin().getZ());
+					bool touched = App->physics->RaycastWorld(body->getWorldTransform().getOrigin() + btVector3(box_size.getX()/4, 0, 0), vertical_ray, Normal);
+					if (!touched || (touched && body->getWorldTransform().getOrigin().distance(vertical_ray) > 3)) 
+					{
+						touched = App->physics->RaycastWorld(body->getWorldTransform().getOrigin() - btVector3(box_size.getX() / 4, 0, 0), vertical_ray, Normal);
+					}
+					if (!touched || (touched && abs(vertical_ray.getY()- (body->getWorldTransform().getOrigin().getY()+box_size.getY()/2))> 0.5 )) 
+					{
 						direction = transform + float3(speed*velocity.x*0.1, velocity.y, speed*velocity.z*0.1);
 						owner->transform.SetGlobalMatrixTranslation(direction);
 						UpdateDimensions();
 						velocity.y = velocity.y + App->physics->gravity.y / 100;
-						if (IsGrounded() && velocity.y < 0) {
+						if (IsGrounded() && velocity.y < 0) 
+						{
 							velocity.y = 0;
 						}
 					}
-					else {
+					else 
+					{
 						velocity.y = 0;
 					}
 				}
@@ -444,13 +467,15 @@ void ComponentCollider::UpdatePosition()
 			
 		}
 		else {
-			if (!grounded) {
+			if (!grounded) 
+			{
 				velocity.y = velocity.y + App->physics->gravity.y / 100;
 				direction = transform + float3(0, velocity.y, 0);
 				owner->transform.SetGlobalMatrixTranslation(direction);
 				UpdateDimensions();
 			}
-			else {
+			else 
+			{
 				velocity.y = 0;
 			}
 
@@ -458,8 +483,10 @@ void ComponentCollider::UpdatePosition()
 		velocity.x = 0;
 		velocity.z = 0;
 	}
-	else {
-		if (!grounded) {
+	else 
+	{
+		if (!grounded) 
+		{
 			velocity.y = velocity.y + App->physics->gravity.y / 100;
 			direction = transform + float3(0, velocity.y, 0);
 			owner->transform.SetGlobalMatrixTranslation(direction);

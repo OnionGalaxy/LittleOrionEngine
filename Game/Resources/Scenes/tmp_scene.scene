@@ -396,6 +396,7 @@
                     "Active_Physics": true,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -429,6 +430,7 @@
                     "Active_Physics": true,
                     "Friction": 0.30000001192092898,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -462,6 +464,7 @@
                     "Active_Physics": true,
                     "Friction": 0.10000000149011612,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -495,6 +498,7 @@
                     "Active_Physics": true,
                     "Friction": 0.10000000149011612,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -536,6 +540,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -569,6 +574,7 @@
                     "Active_Physics": true,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -618,6 +624,7 @@
                     "Active_Physics": true,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -1361,6 +1368,7 @@
                     "Active_Physics": true,
                     "Friction": 0.10000000149011612,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.8299999833106995,
@@ -1580,9 +1588,9 @@
                 "ComponentType": 3,
                 "Active": true,
                 "Translation": [
-                    242.24671936035157,
-                    1.3404773473739625,
-                    -18.989561080932618
+                    189.50140380859376,
+                    -13.509166717529297,
+                    -21.890932083129884
                 ],
                 "Rotation": [
                     -0.0,
@@ -1692,6 +1700,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": true,
                     "Center": [
                         0.0,
                         0.9599999785423279,
@@ -1887,6 +1896,7 @@
                     "Active_Physics": true,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.9700000286102295,
@@ -2058,6 +2068,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -2150,6 +2161,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -3078,6 +3090,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -3170,6 +3183,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -3262,6 +3276,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -3354,6 +3369,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -3536,6 +3552,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
@@ -3718,6 +3735,7 @@
                     "Active_Physics": false,
                     "Friction": 1.0,
                     "Rolling_friction": 1.0,
+                    "manual_movement": false,
                     "Center": [
                         0.0,
                         0.0,
