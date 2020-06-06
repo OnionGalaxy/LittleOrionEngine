@@ -19,7 +19,8 @@ public:
 	FileData ExtractMeshFromAssimp(const aiMesh* assimp_mesh, const aiMatrix4x4& mesh_transformation, float unit_scale_factor, uint32_t mesh_skeleton_uuid) const;
 
 private:
-	FileData CreateBinary(std::vector<Mesh::Vertex> && vertices, std::vector<uint32_t> && indices) const;
+	FileData CreateBinary(std::vector<Mesh::Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<Mesh::MorphTarget> && morphTargets) const;
 	std::vector<std::pair<std::vector<uint32_t>, std::vector<float>>> GetSkinning(const aiMesh* assimp_mesh, uint32_t mesh_skeleton_uuid) const;
+	std::vector<Mesh::MorphTarget> GetMorphTargets(const aiMesh* assimp_mesh) const;
 };
 #endif // !_MESHIMPORTER_H_

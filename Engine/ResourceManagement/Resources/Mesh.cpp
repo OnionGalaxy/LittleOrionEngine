@@ -2,9 +2,10 @@
 
 #include "ResourceManagement/Metafile/Metafile.h"
 
-Mesh::Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices)
+Mesh::Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<MorphTarget> && morph_targets)
 	: vertices(vertices)
 	, indices(indices)
+	, morph_targets(morph_targets)
 	, Resource(uuid)
 {
 	LoadInMemory();

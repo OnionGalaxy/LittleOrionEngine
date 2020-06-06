@@ -16,6 +16,12 @@ public:
 		Quat rotation;
 	};
 
+	struct MorphChannel
+	{
+		std::string name;
+		std::vector<std::pair<int, int>> key_values;
+	};
+
 	struct KeyFrame
 	{
 		float frame;

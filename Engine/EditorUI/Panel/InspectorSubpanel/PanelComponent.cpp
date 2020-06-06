@@ -147,6 +147,17 @@ void PanelComponent::ShowComponentMeshRendererWindow(ComponentMeshRenderer *mesh
 
 		ImGui::Checkbox("Is Raycastable", &mesh_renderer->is_raycastable);
 	}
+
+	if (ImGui::CollapsingHeader(ICON_FA_MEH " Morph Targets", ImGuiTreeNodeFlags_DefaultOpen) && mesh_renderer->mesh_to_render)
+	{
+		auto& morphs_targets = mesh_renderer->mesh_to_render->morph_targets;
+		for (size_t i = 0; i < morphs_targets.size(); i++)
+		{
+			static float weight = 0;
+			std::string target = "Morph " + std::to_string(i);
+			ImGui::SliderFloat(target.c_str(),&weight,0.0, 1.0);
+		}
+	}
 }
 
 void PanelComponent::ShowComponentCameraWindow(ComponentCamera *camera)

@@ -26,7 +26,12 @@ public:
 		uint32_t num_joints = 0;
 	};
 
-	Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices);
+	struct MorphTarget
+	{
+		float3 position;
+	};
+
+	Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<MorphTarget> && morph_targets);
 	~Mesh();
 
 	GLuint GetVAO() const;
@@ -43,6 +48,7 @@ private:
 public:
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
+	std::vector<MorphTarget> morph_targets;
 
 private:
 	GLuint vao = 0;

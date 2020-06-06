@@ -46,6 +46,7 @@ FileData MeshImporter::ExtractMeshFromAssimp(const aiMesh* mesh, const aiMatrix4
 	{
 		vertex_skinning__info = GetSkinning(mesh, mesh_skeleton_uuid);
 	}
+	std::vector<Mesh::MorphTarget> morph_targets = GetMorphTargets(mesh);
 
 	std::vector<Mesh::Vertex> vertices;
 	vertices.reserve(mesh->mNumVertices);
@@ -99,7 +100,7 @@ FileData MeshImporter::ExtractMeshFromAssimp(const aiMesh* mesh, const aiMatrix4
 		vertices.push_back(new_vertex);
 	}
 
-	return CreateBinary(std::move(vertices), std::move(indices));
+	return CreateBinary(std::move(vertices), std::move(indices), std::move(morph_targets));
 }
 
 std::vector<std::pair<std::vector<uint32_t>, std::vector<float>>> MeshImporter::GetSkinning(const aiMesh* mesh, uint32_t mesh_skeleton_uuid) const
@@ -126,14 +127,32 @@ std::vector<std::pair<std::vector<uint32_t>, std::vector<float>>> MeshImporter::
 	return vertex_weights_joint;
 }
 
-FileData MeshImporter::CreateBinary(std::vector<Mesh::Vertex> && vertices, std::vector<uint32_t> && indices) const
+std::vector<Mesh::MorphTarget> MeshImporter::GetMorphTargets(const aiMesh * assimp_mesh) const
+{
+	std::vector<Mesh::MorphTarget> morph_targets;
+	morph_targets.reserve(assimp_mesh->mNumAnimMeshes);
+	for (size_t i = 0; i < assimp_mesh->mNumAnimMeshes; i++)
+	{
+		auto& morph_target = assimp_mesh->mAnimMeshes[i];
+		assert(morph_target->mNumVertices == assimp_mesh->mNumVertices);
+		morph_targets.emplace_back(Mesh::MorphTarget());
+	}
+
+	return morph_targets;
+}
+
+FileData MeshImporter::CreateBinary(std::vector<Mesh::Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<Mesh::MorphTarget> && morph_targets) const
 {
 
 	uint32_t num_indices = indices.size();
 	uint32_t num_vertices = vertices.size();
-	uint32_t ranges[2] = { num_indices, num_vertices };
+	uint32_t num_morph_targets = morph_targets.size();
+	uint32_t ranges[3] = { num_indices, num_vertices, num_morph_targets};
 
-	uint32_t size = sizeof(ranges) + sizeof(uint32_t) * num_indices + sizeof(Mesh::Vertex) * num_vertices + sizeof(uint32_t);
+	uint32_t size = sizeof(ranges) 
+		+ sizeof(uint32_t) * num_indices 
+		+ sizeof(Mesh::Vertex) * num_vertices 
+		+ sizeof(Mesh::MorphTarget) * num_morph_targets;
 
 	char* data = new char[size]; // Allocate
 	char* cursor = data;
@@ -147,6 +166,13 @@ FileData MeshImporter::CreateBinary(std::vector<Mesh::Vertex> && vertices, std::
 	cursor += bytes; // Store vertices
 	bytes = sizeof(Mesh::Vertex) * num_vertices;
 	memcpy(cursor, &vertices.front(), bytes);
+
+	if (num_morph_targets > 0)
+	{
+		cursor += bytes; // Store morphTargets
+		bytes = sizeof(Mesh::MorphTarget) * num_morph_targets;
+		memcpy(cursor, &morph_targets.front(), bytes);
+	}
 
 	FileData mesh_data {data, size};
 	return mesh_data;
