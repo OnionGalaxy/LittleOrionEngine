@@ -46,7 +46,7 @@ FileData MeshImporter::ExtractMeshFromAssimp(const aiMesh* mesh, const aiMatrix4
 	{
 		vertex_skinning__info = GetSkinning(mesh, mesh_skeleton_uuid);
 	}
-	std::vector<Mesh::MorphTarget> morph_targets = GetMorphTargets(mesh);
+	std::vector<Mesh::MorphTarget> morph_targets = GetMorphTargets(mesh, node_transformation);
 
 	std::vector<Mesh::Vertex> vertices;
 	vertices.reserve(mesh->mNumVertices);
@@ -95,7 +95,6 @@ FileData MeshImporter::ExtractMeshFromAssimp(const aiMesh* mesh, const aiMatrix4
 			}
 			float weights_sum_round = std::round(weights_sum);
 			assert(weights_sum_round <= 1.0f && weights_sum_round >= 0.0f);
-			new_vertex.num_joints = vertex_skinning__info[i].second.size();
 		}
 		vertices.push_back(new_vertex);
 	}
@@ -127,53 +126,80 @@ std::vector<std::pair<std::vector<uint32_t>, std::vector<float>>> MeshImporter::
 	return vertex_weights_joint;
 }
 
-std::vector<Mesh::MorphTarget> MeshImporter::GetMorphTargets(const aiMesh * assimp_mesh) const
+std::vector<Mesh::MorphTarget> MeshImporter::GetMorphTargets(const aiMesh * assimp_mesh, const aiMatrix4x4& node_transformation) const
 {
-	std::vector<Mesh::MorphTarget> morph_targets;
-	morph_targets.reserve(assimp_mesh->mNumAnimMeshes);
-	for (size_t i = 0; i < assimp_mesh->mNumAnimMeshes; i++)
+	std::vector<Mesh::MorphTarget> morph_vertices;
+	if (assimp_mesh->mNumAnimMeshes <= 0)
 	{
-		auto& morph_target = assimp_mesh->mAnimMeshes[i];
-		assert(morph_target->mNumVertices == assimp_mesh->mNumVertices);
-		morph_targets.emplace_back(Mesh::MorphTarget());
+		return morph_vertices;
 	}
+	morph_vertices.resize(assimp_mesh->mNumVertices);
+	for (size_t i = 0; i < assimp_mesh->mNumVertices; i++)
+	{
+		for (size_t j = 0; j < assimp_mesh->mNumAnimMeshes; j++)
+		{
+			auto& morph_target = assimp_mesh->mAnimMeshes[j];
+			assert(morph_target->mNumVertices == assimp_mesh->mNumVertices);
+			morph_vertices[i].morph_target.resize(assimp_mesh->mNumAnimMeshes);
 
-	return morph_targets;
+			Mesh::MorphVertex new_vertex;
+			aiVector3D transformed_position = node_transformation * morph_target->mVertices[i];
+			new_vertex.position = float3(transformed_position.x, transformed_position.y, transformed_position.z);
+			if (morph_target->mNormals)
+			{
+				new_vertex.normals = float3(morph_target->mNormals[i].x, morph_target->mNormals[i].y, morph_target->mNormals[i].z);
+			}
+			if (morph_target->mTangents)
+			{
+				new_vertex.tangent = float3(morph_target->mTangents[i].x, morph_target->mTangents[i].y, morph_target->mTangents[i].z);
+			}
+			morph_vertices[i].morph_target[j] = new_vertex;
+		}
+	}
+	
+	return morph_vertices;
 }
 
-FileData MeshImporter::CreateBinary(std::vector<Mesh::Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<Mesh::MorphTarget> && morph_targets) const
+FileData MeshImporter::CreateBinary(std::vector<Mesh::Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<Mesh::MorphTarget> && morph_vertices) const
 {
 
 	uint32_t num_indices = indices.size();
 	uint32_t num_vertices = vertices.size();
-	uint32_t num_morph_targets = morph_targets.size();
+	uint32_t num_morph_targets = morph_vertices.size() > 0 ? morph_vertices[0].morph_target.size() : 0;
 	uint32_t ranges[3] = { num_indices, num_vertices, num_morph_targets};
 
 	uint32_t size = sizeof(ranges) 
 		+ sizeof(uint32_t) * num_indices 
 		+ sizeof(Mesh::Vertex) * num_vertices 
-		+ sizeof(Mesh::MorphTarget) * num_morph_targets;
+		+ sizeof(Mesh::MorphVertex) *  num_vertices * num_morph_targets;
+
+	int x = 0;
 
 	char* data = new char[size]; // Allocate
 	char* cursor = data;
 	size_t bytes = sizeof(ranges); // First store ranges
 	memcpy(cursor, ranges, bytes);
+	x += bytes;
 
 	cursor += bytes; // Store indices
 	bytes = sizeof(uint32_t) * num_indices;
 	memcpy(cursor, &indices.front(), bytes);
+	x += bytes;
 
 	cursor += bytes; // Store vertices
 	bytes = sizeof(Mesh::Vertex) * num_vertices;
 	memcpy(cursor, &vertices.front(), bytes);
+	x += bytes;
 
-	if (num_morph_targets > 0)
+
+	for (auto& target : morph_vertices)
 	{
 		cursor += bytes; // Store morphTargets
-		bytes = sizeof(Mesh::MorphTarget) * num_morph_targets;
-		memcpy(cursor, &morph_targets.front(), bytes);
+		bytes = sizeof(Mesh::MorphVertex) *  num_morph_targets;
+		x += bytes;
+		memcpy(cursor, &target.morph_target.front(), bytes);
 	}
-
+	assert(x == size);
 	FileData mesh_data {data, size};
 	return mesh_data;
 }

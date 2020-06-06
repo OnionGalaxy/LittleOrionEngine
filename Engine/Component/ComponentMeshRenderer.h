@@ -65,6 +65,7 @@ public:
 	std::shared_ptr<Skeleton> skeleton = nullptr;
 
 	std::vector<float4x4> palette;
+	std::vector<float> morph_testing;
 
 	bool is_raycastable = true;
 

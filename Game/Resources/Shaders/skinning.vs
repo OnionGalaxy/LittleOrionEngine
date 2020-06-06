@@ -6,6 +6,7 @@ layout(location = 2) in vec3 vertex_normal;
 layout(location = 3) in vec3 vertex_tangent;
 layout(location = 4) in uvec4 vertex_joints;
 layout(location = 5) in vec4 vertex_weights;
+layout(location = 7) in vec3 morph_targets[4];
 
 layout (std140) uniform Matrices
 {
@@ -35,7 +36,9 @@ struct Material {
 	bool use_normal_map;
 };
 uniform Material material;
+
 uniform mat4 palette[64];
+uniform float morph_weights[4];
 
 out vec2 texCoord;
 out vec3 position;
@@ -57,15 +60,16 @@ mat3 CreateTangentSpace(const vec3 normal, const vec3 tangent);
 void main()
 {
 
-	mat4 skinning_matrix = mat4(0);
+	vec3 morph_position = vec3(0);
     for(uint i=0; i<4; i++)
 	{
-		skinning_matrix += vertex_weights[i] * palette[vertex_joints[i]];
+		morph_position += morph_weights[i] * (morph_targets[i] - vertex_position);
 	}
-	gl_Position = matrices.proj * matrices.view * matrices.model * skinning_matrix * vec4(vertex_position, 1.0);
+	morph_position = (morph_targets[1] - vertex_position);
+	gl_Position = matrices.proj * matrices.view * matrices.model  * vec4(vertex_position + morph_position, 1.0);
 	texCoord = vertex_uv0;
-	position = (matrices.model * skinning_matrix * vec4(vertex_position, 1.0)).xyz;
-	normal = (matrices.model * skinning_matrix * vec4(vertex_normal, 0.0)).xyz;	
+	position = (matrices.model  * vec4(vertex_position, 1.0)).xyz;
+	normal = (matrices.model  * vec4(vertex_normal, 0.0)).xyz;	
 	tangent = (matrices.model*vec4(vertex_tangent, 0.0)).xyz;
 
 	view_pos    = transpose(mat3(matrices.view)) * (-matrices.view[3].xyz);

@@ -2,10 +2,10 @@
 
 #include "ResourceManagement/Metafile/Metafile.h"
 
-Mesh::Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<MorphTarget> && morph_targets)
+Mesh::Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<MorphTarget> && morph_targets_vector)
 	: vertices(vertices)
 	, indices(indices)
-	, morph_targets(morph_targets)
+	, morph_targets_vector(morph_targets_vector)
 	, Resource(uuid)
 {
 	LoadInMemory();
@@ -36,30 +36,16 @@ int Mesh::GetNumVerts() const
 	return vertices.size();
 }
 
-std::vector<Triangle> Mesh::GetTriangles() const
-{
-	std::vector<Triangle> triangles;
-	triangles.reserve(indices.size()/3);
-	for (size_t i = 0; i < indices.size(); i += 3)
-	{
-		float3 first_point = vertices[indices[i]].position;
-		float3 second_point = vertices[indices[i + 1]].position;
-		float3 third_point = vertices[indices[i + 2]].position;
-		triangles.emplace_back(Triangle(first_point, second_point, third_point));
-	}
-	return triangles;
-}
-
 void Mesh::LoadInMemory()
 {
 
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &vmo);
 	glGenBuffers(1, &ebo);
 
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Mesh::Vertex), vertices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -92,6 +78,9 @@ void Mesh::LoadInMemory()
 	// VERTEX WEIGHTS
 	glEnableVertexAttribArray(6);
 	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, weights));
+
+	glEnableVertexAttribArray(7);
+	glVertexAttribPointer(7, MAX_MORPH_TARGETS, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, morph_targets));
 
 	glBindVertexArray(0);
 }

@@ -66,6 +66,10 @@ void ComponentMeshRenderer::Render()
 	{
 		glUniformMatrix4fv(glGetUniformLocation(program, "palette"), palette.size(), GL_TRUE, &palette[0][0][0]);
 	}
+	if (morph_testing.size() > 0)
+	{
+		glUniform3fv(glGetUniformLocation(program, "morph_weights"), 1,morph_testing.data());
+	}
 
 	glBindBuffer(GL_UNIFORM_BUFFER, App->program->uniform_buffer.ubo);
 	glBufferSubData(GL_UNIFORM_BUFFER, App->program->uniform_buffer.MATRICES_UNIFORMS_OFFSET, sizeof(float4x4), owner->transform.GetGlobalModelMatrix().Transposed().ptr());
@@ -229,6 +233,7 @@ void ComponentMeshRenderer::SetMesh(uint32_t mesh_uuid)
 	{
 		this->mesh_to_render = App->resources->Load<Mesh>(mesh_uuid);
 		owner->aabb.GenerateBoundingBox();
+		morph_testing.resize(MAX_MORPH_TARGETS);
 	}
 }
 
