@@ -6,7 +6,19 @@ layout(location = 2) in vec3 vertex_normal;
 layout(location = 3) in vec3 vertex_tangent;
 layout(location = 4) in uvec4 vertex_joints;
 layout(location = 5) in vec4 vertex_weights;
-layout(location = 7) in vec3 morph_targets[4];
+layout(location = 9) in uint vertex_index;
+
+
+const uint MAX_MORPH_TARGETS = 20;
+struct MorphTarget
+{
+	vec3 target[MAX_MORPH_TARGETS];
+};
+
+layout(std430, binding = 7) buffer layoutName
+{
+    MorphTarget morph_targets[];
+};
 
 layout (std140) uniform Matrices
 {
@@ -38,7 +50,7 @@ struct Material {
 uniform Material material;
 
 uniform mat4 palette[64];
-uniform float morph_weights[4];
+uniform float morph_weights[MAX_MORPH_TARGETS];
 
 out vec2 texCoord;
 out vec3 position;
@@ -53,7 +65,7 @@ out vec3 view_dir;
 //With tangent modification
 out vec3 t_view_pos;
 out vec3 t_frag_pos;
-
+out vec3 color;
 //Normal mapping
 mat3 CreateTangentSpace(const vec3 normal, const vec3 tangent);
 
@@ -61,11 +73,10 @@ void main()
 {
 
 	vec3 morph_position = vec3(0);
-    for(uint i=0; i<4; i++)
+    for(uint i=0; i<MAX_MORPH_TARGETS; i++)
 	{
-		morph_position += morph_weights[i] * (morph_targets[i] - vertex_position);
+		morph_position += morph_weights[i] * (morph_targets[vertex_index].target[i] - vertex_position);
 	}
-	morph_position = (morph_targets[1] - vertex_position);
 	gl_Position = matrices.proj * matrices.view * matrices.model  * vec4(vertex_position + morph_position, 1.0);
 	texCoord = vertex_uv0;
 	position = (matrices.model  * vec4(vertex_position, 1.0)).xyz;

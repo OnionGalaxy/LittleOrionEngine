@@ -1,4 +1,4 @@
-#include "Mesh.h"
+﻿#include "Mesh.h"
 
 #include "ResourceManagement/Metafile/Metafile.h"
 
@@ -41,7 +41,7 @@ void Mesh::LoadInMemory()
 
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &vmo);
+	glGenBuffers(1, &ssbo);
 	glGenBuffers(1, &ebo);
 
 	glBindVertexArray(vao);
@@ -79,9 +79,16 @@ void Mesh::LoadInMemory()
 	glEnableVertexAttribArray(6);
 	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, weights));
 
-	glEnableVertexAttribArray(7);
-	glVertexAttribPointer(7, MAX_MORPH_TARGETS, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, morph_targets));
+	glEnableVertexAttribArray(9);
+	glVertexAttribIPointer(9, 1, GL_UNSIGNED_INT, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, index));
 
+	
+	if (morph_targets_vector.size() > 0)
+	{
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(MorphTarget) * morph_targets_vector.size(), morph_targets_vector.data(), GL_STATIC_DRAW);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, ssbo);
+	}
 	glBindVertexArray(0);
 }
 

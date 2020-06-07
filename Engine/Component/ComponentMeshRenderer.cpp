@@ -66,9 +66,9 @@ void ComponentMeshRenderer::Render()
 	{
 		glUniformMatrix4fv(glGetUniformLocation(program, "palette"), palette.size(), GL_TRUE, &palette[0][0][0]);
 	}
-	if (morph_testing.size() > 0)
+	if (mesh_to_render->morph_targets_vector.size() > 0)
 	{
-		glUniform3fv(glGetUniformLocation(program, "morph_weights"), 1,morph_testing.data());
+		glUniform1fv(glGetUniformLocation(program, "morph_weights"), morph_testing.size(), morph_testing.data());
 	}
 
 	glBindBuffer(GL_UNIFORM_BUFFER, App->program->uniform_buffer.ubo);

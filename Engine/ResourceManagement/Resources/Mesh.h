@@ -11,7 +11,7 @@
 class Metafile;
 
 static const size_t MAX_JOINTS = 4;
-static const size_t MAX_MORPH_TARGETS = 4;
+static const size_t MAX_MORPH_TARGETS = 20;
 class Mesh : public Resource
 {
 public:
@@ -24,7 +24,7 @@ public:
 		float2 tex_coords;
 		uint32_t joints[MAX_JOINTS] = {0,0,0,0};
 		float weights[MAX_JOINTS] = {0,0,0,0};
-		float3 morph_targets[MAX_MORPH_TARGETS];
+		uint32_t index = 0;
 	};
 	struct MorphVertex
 	{
@@ -34,8 +34,9 @@ public:
 	};
 	struct MorphTarget
 	{
-		std::vector<MorphVertex> morph_target;
-		float weight = 0.0f; //FOR TESTING, TODO: REMOVE THIS
+		float3 morph_targets[MAX_MORPH_TARGETS];
+		//float3 morph_targets[MAX_MORPH_TARGETS];
+		//std::vector<MorphVertex> morph_target;
 	};
 
 	Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<MorphTarget> && morph_targets_vector);
@@ -60,7 +61,7 @@ public:
 private:
 	GLuint vao = 0;
 	GLuint vbo = 0;
-	GLuint vmo = 0;
+	GLuint ssbo = 0;
 	GLuint ebo = 0;
 };
 
