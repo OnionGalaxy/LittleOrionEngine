@@ -169,7 +169,7 @@ void main()
 
 	result += emissive_color;
 	//FragColor = vec4(vec3(normalize(tangent)),1.0);
-	FragColor = vec4(result,1.0);
+	FragColor = vec4(color,1.0);
 
 	//Gamma Correction
 	FragColor.rgb = pow(FragColor.rgb, vec3(1/gamma));

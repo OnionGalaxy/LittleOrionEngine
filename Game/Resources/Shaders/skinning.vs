@@ -15,7 +15,7 @@ struct MorphTarget
 	vec3 target[MAX_MORPH_TARGETS];
 };
 
-layout(std430, binding = 7) buffer layoutName
+layout(std430, binding = 10) buffer layoutName
 {
     MorphTarget morph_targets[];
 };
@@ -77,6 +77,7 @@ void main()
 	{
 		morph_position += morph_weights[i] * (morph_targets[vertex_index].target[i] - vertex_position);
 	}
+	color = vec3(vertex_index/4820, 0.0,0.0);
 	gl_Position = matrices.proj * matrices.view * matrices.model  * vec4(vertex_position + morph_position, 1.0);
 	texCoord = vertex_uv0;
 	position = (matrices.model  * vec4(vertex_position, 1.0)).xyz;
