@@ -69,6 +69,8 @@ void ComponentMeshRenderer::Render()
 	if (mesh_to_render->morph_targets_vector.size() > 0)
 	{
 		glUniform1fv(glGetUniformLocation(program, "morph_weights"), morph_testing.size(), morph_testing.data());
+		glUniform1ui(glGetUniformLocation(program, "num_morph_targets"), mesh_to_render->num_morph_targets);
+		glUniform1ui(glGetUniformLocation(program, "num_vertices"), mesh_to_render->vertices.size());
 	}
 
 	glBindBuffer(GL_UNIFORM_BUFFER, App->program->uniform_buffer.ubo);
@@ -233,7 +235,7 @@ void ComponentMeshRenderer::SetMesh(uint32_t mesh_uuid)
 	{
 		this->mesh_to_render = App->resources->Load<Mesh>(mesh_uuid);
 		owner->aabb.GenerateBoundingBox();
-		morph_testing.resize(MAX_MORPH_TARGETS);
+		morph_testing.resize(mesh_to_render->num_morph_targets);
 	}
 }
 

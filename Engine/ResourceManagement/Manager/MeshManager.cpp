@@ -20,7 +20,7 @@ std::shared_ptr<Mesh> MeshManager::Load(uint32_t uuid, const FileData& resource_
 
 	std::vector<uint32_t> indices;
 	std::vector<Mesh::Vertex> vertices;
-	std::vector<Mesh::MorphTarget> morph_targets;
+	std::vector<Mesh::MorphVertex> morph_targets;
 
 	indices.resize(ranges[0]);
 
@@ -34,15 +34,16 @@ std::shared_ptr<Mesh> MeshManager::Load(uint32_t uuid, const FileData& resource_
 	bytes = sizeof(Mesh::Vertex) * ranges[1];
 	memcpy(&vertices.front(), cursor, bytes);
 
-	if (ranges[2] > 0)
+	float num_of_morph_vertex = ranges[2] * ranges[1];
+	if (num_of_morph_vertex > 0)
 	{
-		morph_targets.resize(ranges[1]);
+		morph_targets.resize(num_of_morph_vertex);
 		cursor += bytes; // Get vertices
-		bytes = sizeof(Mesh::MorphTarget) * ranges[1];
+		bytes = sizeof(Mesh::MorphVertex) * num_of_morph_vertex;
 		memcpy(&morph_targets.front(), cursor, bytes);
 	}
 
 	std::shared_ptr<Mesh> new_mesh = std::make_shared<Mesh>(uuid, std::move(vertices), std::move(indices), std::move(morph_targets));
-
+	new_mesh->num_morph_targets = 20;
 	return new_mesh;
 }

@@ -10,14 +10,16 @@ layout(location = 9) in uint vertex_index;
 
 
 const uint MAX_MORPH_TARGETS = 20;
-struct MorphTarget
+struct MorphVertex
 {
-	vec3 target[MAX_MORPH_TARGETS];
+	vec4 position;
+	vec4 tangent;
+	vec4 normal;
 };
 
-layout(std430, binding = 10) buffer layoutName
+layout(std430 , binding = 10) buffer morphing_data
 {
-    MorphTarget morph_targets[];
+    MorphVertex morph_targets[];
 };
 
 layout (std140) uniform Matrices
@@ -51,6 +53,8 @@ uniform Material material;
 
 uniform mat4 palette[64];
 uniform float morph_weights[MAX_MORPH_TARGETS];
+uniform uint num_morph_targets;
+uniform uint num_vertices;
 
 out vec2 texCoord;
 out vec3 position;
@@ -73,11 +77,10 @@ void main()
 {
 
 	vec3 morph_position = vec3(0);
-    for(uint i=0; i<MAX_MORPH_TARGETS; i++)
+    for(uint i=0; i<num_morph_targets; i++)
 	{
-		morph_position += morph_weights[i] * (morph_targets[vertex_index].target[i] - vertex_position);
+		morph_position += morph_weights[i] * (morph_targets[(i * num_vertices) + vertex_index].position.rgb- vertex_position);
 	}
-	color = vec3(vertex_index/4820, 0.0,0.0);
 	gl_Position = matrices.proj * matrices.view * matrices.model  * vec4(vertex_position + morph_position, 1.0);
 	texCoord = vertex_uv0;
 	position = (matrices.model  * vec4(vertex_position, 1.0)).xyz;

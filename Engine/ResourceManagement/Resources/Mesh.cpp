@@ -2,7 +2,7 @@
 
 #include "ResourceManagement/Metafile/Metafile.h"
 
-Mesh::Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<MorphTarget> && morph_targets_vector)
+Mesh::Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<MorphVertex> && morph_targets_vector)
 	: vertices(vertices)
 	, indices(indices)
 	, morph_targets_vector(morph_targets_vector)
@@ -17,6 +17,7 @@ Mesh::~Mesh()
 	{
 		glDeleteBuffers(1, &vbo);
 		glDeleteBuffers(1, &ebo);
+		glDeleteBuffers(1, &ssbo);
 		glDeleteVertexArrays(1, &vao);
 	}
 }
@@ -82,11 +83,10 @@ void Mesh::LoadInMemory()
 	glEnableVertexAttribArray(9);
 	glVertexAttribIPointer(9, 1, GL_UNSIGNED_INT, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, index));
 
-	
 	if (morph_targets_vector.size() > 0)
 	{
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(MorphTarget) * morph_targets_vector.size(), morph_targets_vector.data(), GL_STATIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(MorphVertex) * morph_targets_vector.size(), morph_targets_vector.data(), GL_STATIC_DRAW);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, ssbo);
 	}
 	glBindVertexArray(0);

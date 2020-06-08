@@ -11,7 +11,6 @@
 class Metafile;
 
 static const size_t MAX_JOINTS = 4;
-static const size_t MAX_MORPH_TARGETS = 20;
 class Mesh : public Resource
 {
 public:
@@ -28,18 +27,12 @@ public:
 	};
 	struct MorphVertex
 	{
-		float3 position;
-		float3 normals;
-		float3 tangent;
-	};
-	struct MorphTarget
-	{
-		float3 morph_targets[MAX_MORPH_TARGETS];
-		//float3 morph_targets[MAX_MORPH_TARGETS];
-		//std::vector<MorphVertex> morph_target;
+		float4 position;
+		float4 normals;
+		float4 tangent;
 	};
 
-	Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<MorphTarget> && morph_targets_vector);
+	Mesh(uint32_t uuid, std::vector<Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<MorphVertex> && morph_targets_vector);
 	~Mesh();
 
 	GLuint GetVAO() const;
@@ -56,7 +49,8 @@ private:
 public:
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
-	std::vector<MorphTarget> morph_targets_vector;
+	std::vector<MorphVertex> morph_targets_vector;
+	size_t num_morph_targets;
 
 private:
 	GLuint vao = 0;
