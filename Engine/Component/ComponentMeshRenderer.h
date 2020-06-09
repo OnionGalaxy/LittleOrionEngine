@@ -34,6 +34,7 @@ public:
 	void Delete() override;
 
 	void Render();
+	void AnimationUniforms(const GLuint &program);
 	void RenderModel() const;
 	void RenderMaterial(GLuint shader_program) const;
 
@@ -49,9 +50,10 @@ private:
 	void AddSpecularUniforms(unsigned int shader_program) const;
 	void AddAmbientOclusionUniforms(unsigned int shader_program) const;
 	void AddNormalUniforms(unsigned int shader_program) const;
+	void AddLightMapUniforms(unsigned int shader_program) const;
 	void AddExtraUniforms(unsigned int shader_program) const;
 
-	void BindTexture(Material::MaterialTextureType id) const;
+	bool BindTexture(Material::MaterialTextureType id) const;
 	bool BindTextureNormal(Material::MaterialTextureType id) const;
 
 public:

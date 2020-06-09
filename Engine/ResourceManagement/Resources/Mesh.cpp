@@ -58,7 +58,7 @@ void Mesh::LoadInMemory()
 
 	// VERTEX TEXTURE COORDS
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, tex_coords));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, tex_coords[0]));
 
 	// VERTEX NORMALS
 	glEnableVertexAttribArray(2);
@@ -67,21 +67,24 @@ void Mesh::LoadInMemory()
 	// VERTEX TANGENT
 	glEnableVertexAttribArray(3);
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, tangent));
-
-	// VERTEX BITANGENT
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, bitangent));
 	
 	// VERTEX JOINTS
-	glEnableVertexAttribArray(5);
+	glEnableVertexAttribArray(4);
 	glVertexAttribIPointer(4, 4, GL_UNSIGNED_INT, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, joints));
 
 	// VERTEX WEIGHTS
-	glEnableVertexAttribArray(6);
+	glEnableVertexAttribArray(5);
 	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, weights));
 
-	glEnableVertexAttribArray(9);
-	glVertexAttribIPointer(9, 1, GL_UNSIGNED_INT, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, index));
+	// VERTEX NUM JOINTS
+	glEnableVertexAttribArray(6);
+	glVertexAttribIPointer(6, 1, GL_UNSIGNED_INT, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, num_joints));
+
+	glEnableVertexAttribArray(7);
+	glVertexAttribPointer(7, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, tex_coords[1]));
+
+	glEnableVertexAttribArray(8);
+	glVertexAttribIPointer(8, 1, GL_UNSIGNED_INT, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, index));
 
 	if (morph_targets_vector.size() > 0)
 	{
@@ -89,6 +92,7 @@ void Mesh::LoadInMemory()
 		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(MorphVertex) * morph_targets_vector.size(), morph_targets_vector.data(), GL_STATIC_DRAW);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, ssbo);
 	}
+
 	glBindVertexArray(0);
 }
 

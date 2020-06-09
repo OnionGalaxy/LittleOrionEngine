@@ -55,9 +55,14 @@ FileData MeshImporter::ExtractMeshFromAssimp(const aiMesh* mesh, const aiMatrix4
 		Mesh::Vertex new_vertex;
 		aiVector3D transformed_position = node_transformation * mesh->mVertices[i];
 		new_vertex.position = float3(transformed_position.x, transformed_position.y, transformed_position.z);
-		if (mesh->mTextureCoords[0]) 
+		for (size_t j = 0; j < UVChannel::TOTALUVS; j++)
 		{
-			new_vertex.tex_coords = float2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+			float2 text_coordinate(float2::zero);
+			if (mesh->mTextureCoords[j])
+			{
+				text_coordinate = float2(mesh->mTextureCoords[j][i].x, mesh->mTextureCoords[j][i].y);
+			}
+			new_vertex.tex_coords[j] = text_coordinate;
 		}
 		if (mesh->mNormals)
 		{
@@ -71,7 +76,8 @@ FileData MeshImporter::ExtractMeshFromAssimp(const aiMesh* mesh, const aiMatrix4
 		{
 			new_vertex.bitangent = float3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
 		}
-		if (vertex_skinning__info.size() > 0)
+		new_vertex.num_joints = vertex_skinning__info.size();
+		if (new_vertex.num_joints > 0)
 		{
 			assert(vertex_skinning__info[i].first.size() <= MAX_JOINTS);
 			for (size_t j = 0; j < vertex_skinning__info[i].first.size(); ++j)
