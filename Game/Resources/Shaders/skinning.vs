@@ -9,7 +9,7 @@ layout(location = 5) in vec4 vertex_weights;
 layout(location = 9) in uint vertex_index;
 
 
-const uint MAX_MORPH_TARGETS = 20;
+const uint MAX_MORPH_TARGETS = 60;
 struct MorphVertex
 {
 	vec4 position;
@@ -21,6 +21,10 @@ layout(std430 , binding = 10) buffer morphing_data
 {
     MorphVertex morph_targets[];
 };
+uniform mat4 palette[64];
+uniform float morph_weights[MAX_MORPH_TARGETS];
+uniform uint num_morph_targets;
+uniform uint num_vertices;
 
 layout (std140) uniform Matrices
 {
@@ -50,11 +54,6 @@ struct Material {
 	bool use_normal_map;
 };
 uniform Material material;
-
-uniform mat4 palette[64];
-uniform float morph_weights[MAX_MORPH_TARGETS];
-uniform uint num_morph_targets;
-uniform uint num_vertices;
 
 out vec2 texCoord;
 out vec3 position;

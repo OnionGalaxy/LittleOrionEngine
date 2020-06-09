@@ -44,6 +44,6 @@ std::shared_ptr<Mesh> MeshManager::Load(uint32_t uuid, const FileData& resource_
 	}
 
 	std::shared_ptr<Mesh> new_mesh = std::make_shared<Mesh>(uuid, std::move(vertices), std::move(indices), std::move(morph_targets));
-	new_mesh->num_morph_targets = 20;
+	new_mesh->num_morph_targets = ranges[2];
 	return new_mesh;
 }
