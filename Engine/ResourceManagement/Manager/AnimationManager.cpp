@@ -35,6 +35,10 @@ std::shared_ptr<Animation> AnimationManager::Load(uint32_t uuid, const FileData&
 	memcpy(&num_keyframe, cursor, sizeof(uint32_t));
 	cursor += sizeof(uint32_t); // Get keyframes
 
+	uint32_t num_morph_channels;
+	memcpy(&num_morph_channels, cursor, sizeof(uint32_t));
+	cursor += sizeof(uint32_t); // Get keyframes
+
 	std::vector<Animation::KeyFrame> keyframes;
 	keyframes.resize(num_keyframe);
 	for (auto & keyframe : keyframes)
@@ -67,7 +71,39 @@ std::shared_ptr<Animation> AnimationManager::Load(uint32_t uuid, const FileData&
 		}
 	}
 
-	std::shared_ptr<Animation> new_animation = std::make_shared<Animation>(uuid, std::move(keyframes), animation_name, animation_frames, frames_per_second);
+	std::vector<Animation::MorphChannel> morph_channels;
+	morph_channels.resize(num_morph_channels);
+	for (auto & channel : morph_channels)
+	{
+
+		memcpy( &channel.mesh_hash, cursor, sizeof(uint64_t));
+		cursor += sizeof(uint64_t);
+
+		uint32_t number_keyframes = 0;
+		memcpy(&number_keyframes, cursor, sizeof(uint32_t));
+		cursor += sizeof(uint32_t);
+
+		channel.keyframes.resize(number_keyframes);
+
+
+		for (auto & keyframe : channel.keyframes)
+		{
+			memcpy( &keyframe.frame, cursor, sizeof(float));
+			cursor += sizeof(float);
+
+			uint32_t number_targets = 0;
+			memcpy( &number_targets, cursor, sizeof(uint32_t));
+			cursor += sizeof(uint32_t);
+
+			keyframe.morph_targets.resize(number_targets);
+			uint32_t bytes = sizeof(Animation::MorphWeight) * number_targets;
+			memcpy(&keyframe.morph_targets.front(), cursor, bytes);
+			cursor += bytes;
+		}
+	}
+
+
+	std::shared_ptr<Animation> new_animation = std::make_shared<Animation>(uuid, std::move(keyframes), std::move(morph_channels), animation_name, animation_frames, frames_per_second);
 
 	return new_animation;
 }

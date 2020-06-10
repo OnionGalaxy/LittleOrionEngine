@@ -106,9 +106,8 @@ FileData MeshImporter::ExtractMeshFromAssimp(const aiMesh* mesh, const aiMatrix4
 		vertices.push_back(new_vertex);
 	}
 
-	CreateBinary(std::move(vertices), std::move(indices), std::move(morph_targets));
-
-	return CreateBinary(std::move(vertices), std::move(indices), std::move(morph_targets));
+	std::string mesh_name = mesh->mName.C_Str();
+	return CreateBinary(std::move(vertices), std::move(indices), std::move(morph_targets), std::hash<std::string>{}(mesh_name));
 }
 
 std::vector<std::pair<std::vector<uint32_t>, std::vector<float>>> MeshImporter::GetSkinning(const aiMesh* mesh, uint32_t mesh_skeleton_uuid) const
@@ -170,7 +169,7 @@ std::vector<Mesh::MorphVertex> MeshImporter::GetMorphTargets(const aiMesh * assi
 	return morph_vertices;
 }
 
-FileData MeshImporter::CreateBinary(std::vector<Mesh::Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<Mesh::MorphVertex> && morph_vertices) const
+FileData MeshImporter::CreateBinary(std::vector<Mesh::Vertex> && vertices, std::vector<uint32_t> && indices, std::vector<Mesh::MorphVertex> && morph_vertices, uint64_t name_hash) const
 {
 
 	uint32_t num_indices = indices.size();

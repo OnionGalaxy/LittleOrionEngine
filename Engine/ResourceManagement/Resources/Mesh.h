@@ -58,7 +58,8 @@ public:
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 	std::vector<MorphVertex> morph_targets_vector;
-	size_t num_morph_targets;
+	size_t num_morph_targets = 0;
+	uint64_t mesh_name_hash = 0;
 
 private:
 	GLuint vao = 0;

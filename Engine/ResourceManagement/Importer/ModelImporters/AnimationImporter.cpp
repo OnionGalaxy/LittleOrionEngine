@@ -4,7 +4,7 @@
 #include "Main/Application.h"
 #include "Module/ModuleFileSystem.h"
 #include "ResourceManagement/Importer/ModelImporters/SkeletonImporter.h"
-#include "ResourceManagement/Resources/Animation.h"
+
 
 #include <assimp/scene.h>
 #include <cmath>
@@ -27,8 +27,8 @@ FileData AnimationImporter::ExtractAnimationFromAssimp(const aiScene* scene, con
 
 	std::map<const std::string, std::vector<const aiNode *>> nodes;
 	GetAssimpNodeTansformationOutSideChannels(scene->mRootNode, own_format_animation, nodes);
-
 	ApplyNodeTansformationOutSideChannels(nodes, unit_scale_factor, own_format_animation);
+	GetMorphingAnimation(animation, own_format_animation);
 
 	return CreateBinary(own_format_animation);
 }
@@ -127,20 +127,54 @@ void AnimationImporter::GetChannelTransform(const float4x4 & pre_transform, cons
 	}
 }
 
+void AnimationImporter::GetMorphingAnimation(const aiAnimation * animation, Animation & own_format_animation) const
+{
+	for (size_t i = 0; i < animation->mNumMorphMeshChannels; i++)
+	{
+		auto& morph_channel = animation->mMorphMeshChannels[i];
+
+		std::string mesh_name = morph_channel->mName.C_Str();
+		Animation::MorphChannel own_format_morph_channel{ std::hash<std::string>{}(mesh_name) };
+		own_format_morph_channel.keyframes.reserve(morph_channel->mNumKeys);
+
+		for (size_t j = 0; j < morph_channel->mNumKeys; j++)
+		{
+			auto& morph_key = morph_channel->mKeys[j];
+			Animation::MorphKeyFrame keyframe{ morph_key.mTime};
+			for (size_t k = 0; k < morph_key.mNumValuesAndWeights; k++)
+			{
+				keyframe.morph_targets.push_back({morph_key.mValues[k], static_cast<float>( morph_key.mWeights[k])});
+			}
+			own_format_morph_channel.keyframes.push_back(keyframe);
+		}
+		own_format_animation.morph_channels.push_back(own_format_morph_channel);
+	}
+}
+
 FileData AnimationImporter::CreateBinary(const Animation& animation) const
 {
-	// number of keyframes +  name size + name + duration
-	uint32_t size = sizeof(uint32_t) * 2 + animation.name.size() + sizeof(float);
+	// name size + name +  duration + frames per second + (num channels + num keyframes)
+	uint32_t size = sizeof(uint32_t)  + animation.name.size() + sizeof(float) + sizeof(float) + sizeof(uint32_t)*2;
 
 	for (auto & keyframe : animation.keyframes)
 	{
-		//Number of channels + frame + ticks_per_second 
-		size += sizeof(uint32_t) + sizeof(float) + sizeof(float);
-
+		//Number of channels + frame 
+		size += sizeof(uint32_t) + sizeof(float);
 		for (auto & channel : keyframe.channels)
 		{
 			//name size + name + translation + rotation
 			size += sizeof(uint32_t) + channel.name.size() + sizeof(float3) + sizeof(Quat);
+		}
+	}
+	for (auto & channel : animation.morph_channels)
+	{
+		//Mesh hash + number of keyframes
+		size += sizeof(uint64_t) + sizeof(uint32_t);
+
+		for (auto & keyframe :channel.keyframes)
+		{
+			//frame + number of targets + (total size of weight vector)
+			size += sizeof(float) + sizeof(uint32_t) + ( keyframe.morph_targets.size() * sizeof(Animation::MorphWeight));
 		}
 	}
 
@@ -160,12 +194,15 @@ FileData AnimationImporter::CreateBinary(const Animation& animation) const
 	cursor += sizeof(float); // Store duration
 
 	memcpy(cursor, &animation.frames_per_second, sizeof(float));
-	cursor += sizeof(float); // Store duration
+	cursor += sizeof(float); // Store frames per second
 
 	uint32_t num_keyframes = animation.keyframes.size();
 	memcpy(cursor, &num_keyframes, sizeof(uint32_t));
-	cursor += sizeof(uint32_t); // Store channels
+	cursor += sizeof(uint32_t); // Store keyframes
 
+	uint32_t num_morph_channels = animation.morph_channels.size();
+	memcpy(cursor, &num_morph_channels, sizeof(uint32_t));
+	cursor += sizeof(uint32_t); // Store morph channels
 
 	for (auto & keyframe : animation.keyframes)
 	{
@@ -191,6 +228,30 @@ FileData AnimationImporter::CreateBinary(const Animation& animation) const
 
 			memcpy(cursor, &channel.rotation, sizeof(Quat));
 			cursor += sizeof(Quat);
+		}
+	}
+
+	for (auto & channel : animation.morph_channels)
+	{
+		memcpy(cursor, &channel.mesh_hash, sizeof(uint64_t));
+		cursor += sizeof(uint64_t);
+
+		uint32_t number_keyframes = channel.keyframes.size();
+		memcpy(cursor, &number_keyframes, sizeof(uint32_t));
+		cursor += sizeof(uint32_t);
+
+		for (auto & keyframe : channel.keyframes)
+		{
+			memcpy(cursor, &keyframe.frame, sizeof(float));
+			cursor += sizeof(float);
+
+			uint32_t number_targets = keyframe.morph_targets.size();
+			memcpy(cursor, &number_targets, sizeof(uint32_t));
+			cursor += sizeof(uint32_t);
+
+			uint32_t bytes = sizeof(Animation::MorphWeight) * number_targets;
+			memcpy(cursor, &keyframe.morph_targets.front(), bytes);
+			cursor += bytes;
 		}
 	}
 
