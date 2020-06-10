@@ -57,13 +57,13 @@ private:
 	bool BindTextureNormal(Material::MaterialTextureType id) const;
 
 public:
-	uint32_t mesh_uuid;
+	uint32_t mesh_uuid = 0;
 	std::shared_ptr<Mesh> mesh_to_render = nullptr;
 
-	uint32_t material_uuid;
+	uint32_t material_uuid = 0;
 	std::shared_ptr<Material> material_to_render = nullptr;
 
-	uint32_t skeleton_uuid;
+	uint32_t skeleton_uuid = 0;
 	std::shared_ptr<Skeleton> skeleton = nullptr;
 
 	std::vector<float4x4> palette;

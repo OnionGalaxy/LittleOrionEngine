@@ -16,7 +16,6 @@ in vec3 view_dir;
 in mat3 TBN;
 in vec3 t_view_pos;
 in vec3 t_frag_pos;
-in vec3 color;
 
 
 out vec4 FragColor;

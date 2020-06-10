@@ -13,7 +13,7 @@ layout(location = 6) in uint vertex_num_joints;
 
 layout(location = 8) in uint vertex_index;
 
-
+//************Animation********************
 const uint MAX_MORPH_TARGETS = 60;
 struct MorphVertex
 {
@@ -26,11 +26,13 @@ layout(std430 , binding = 10) buffer morphing_data
 {
     MorphVertex morph_targets[];
 };
-uniform mat4 palette[64];
+uniform mat4 palette[128];
 uniform float morph_weights[MAX_MORPH_TARGETS];
 uniform uint num_morph_targets;
 uniform uint num_vertices;
+uniform int has_skinning_value;
 
+//****************************************
 layout (std140) uniform Matrices
 {
   mat4 model;
@@ -86,12 +88,13 @@ void main()
 {
 
 //Skinning
-	mat4 skinning_matrix = mat4(0);
-    for(uint i=0; i<vertex_num_joints; i++)
+	mat4 skinning_matrix = mat4(has_skinning_value);
+   for(uint i=0; i<vertex_num_joints; i++)
 	{
 		skinning_matrix += vertex_weights[i] * palette[vertex_joints[i]];
 	}
 
+	//Morphing
 	vec3 morph_position = vec3(0);
     for(uint i=0; i<num_morph_targets; i++)
 	{

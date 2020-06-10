@@ -86,6 +86,7 @@ void ComponentMeshRenderer::AnimationUniforms(const GLuint &program)
 		glUniform1ui(glGetUniformLocation(program, "num_morph_targets"), mesh_to_render->num_morph_targets);
 		glUniform1ui(glGetUniformLocation(program, "num_vertices"), mesh_to_render->vertices.size());
 	}
+	glUniform1i(glGetUniformLocation(program, "has_skinning_value"), skeleton_uuid != 0 ? 0 : 1);
 }
 
 
