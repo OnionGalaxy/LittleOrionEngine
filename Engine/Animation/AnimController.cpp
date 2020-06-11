@@ -6,9 +6,6 @@
 #include "Module/ModuleTime.h"
 #include "ResourceManagement/Resources/StateMachine.h"
 #include "Helper/Utils.h"
-#include <cmath>
-
-#include <math.h>
 
 void AnimController::GetClipTransform(uint32_t skeleton_uuid, std::vector<math::float4x4>& pose, uint64_t mesh_hash_name, std::vector<float>& morph_weights)
 {

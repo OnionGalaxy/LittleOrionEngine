@@ -83,9 +83,9 @@ void ComponentMeshRenderer::AnimationUniforms(const GLuint &program)
 	if (mesh_to_render->morph_targets_vector.size() > 0)
 	{
 		glUniform1fv(glGetUniformLocation(program, "morph_weights"), morph_target_weights.size(), morph_target_weights.data());
-		glUniform1ui(glGetUniformLocation(program, "num_morph_targets"), mesh_to_render->num_morph_targets);
 		glUniform1ui(glGetUniformLocation(program, "num_vertices"), mesh_to_render->vertices.size());
 	}
+	glUniform1ui(glGetUniformLocation(program, "num_morph_targets"), mesh_to_render->num_morph_targets);
 	glUniform1i(glGetUniformLocation(program, "has_skinning_value"), skeleton_uuid != 0 ? 0 : 1);
 }
 
