@@ -178,6 +178,7 @@ FileData MeshImporter::CreateBinary(std::vector<Mesh::Vertex> && vertices, std::
 	uint32_t ranges[3] = { num_indices, num_vertices, num_morph_targets};
 
 	uint32_t size = sizeof(ranges) 
+		+ sizeof(uint64_t)
 		+ sizeof(uint32_t) * num_indices 
 		+ sizeof(Mesh::Vertex) * num_vertices 
 		+ sizeof(Mesh::MorphVertex) *morph_vertices.size();
@@ -198,6 +199,11 @@ FileData MeshImporter::CreateBinary(std::vector<Mesh::Vertex> && vertices, std::
 	cursor += bytes; // Store vertices
 	bytes = sizeof(Mesh::Vertex) * num_vertices;
 	memcpy(cursor, &vertices.front(), bytes);
+	x += bytes;
+
+	cursor += bytes; // Store name
+	bytes = sizeof(uint64_t);
+	memcpy(cursor, &name_hash, bytes);
 	x += bytes;
 
 	if (num_morph_targets > 0)

@@ -34,6 +34,11 @@ std::shared_ptr<Mesh> MeshManager::Load(uint32_t uuid, const FileData& resource_
 	bytes = sizeof(Mesh::Vertex) * ranges[1];
 	memcpy(&vertices.front(), cursor, bytes);
 
+	uint64_t name_hash = 0;
+	cursor += bytes; // Get name
+	bytes = sizeof(uint64_t);
+	memcpy(&name_hash, cursor, bytes);
+
 	float num_of_morph_vertex = ranges[2] * ranges[1];
 	if (num_of_morph_vertex > 0)
 	{
@@ -45,5 +50,6 @@ std::shared_ptr<Mesh> MeshManager::Load(uint32_t uuid, const FileData& resource_
 
 	std::shared_ptr<Mesh> new_mesh = std::make_shared<Mesh>(uuid, std::move(vertices), std::move(indices), std::move(morph_targets));
 	new_mesh->num_morph_targets = ranges[2];
+	new_mesh->mesh_name_hash = name_hash;
 	return new_mesh;
 }

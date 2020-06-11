@@ -149,9 +149,12 @@ void ComponentAnimation::UpdateMeshes()
 	}
 	for (auto & mesh : skinned_meshes)
 	{
-		pose.resize(mesh->skeleton->skeleton.size());
 		auto & skeleton = mesh->skeleton;
-		animation_controller->GetClipTransform(skeleton->GetUUID(), pose);
+		auto & mesh_resource = mesh->mesh_to_render;
+
+		pose.resize(skeleton->skeleton.size());
+
+		animation_controller->GetClipTransform(skeleton->GetUUID(), pose, mesh_resource->mesh_name_hash, mesh->morph_testing);
 		mesh->UpdatePalette(pose);
 	}
 }

@@ -38,7 +38,7 @@ public:
 
 	bool Update();
 	void SetStateMachine(uint32_t state_machine_uuid);
-	void GetClipTransform(uint32_t skeleton_uuid, std::vector<math::float4x4>& pose);
+	void GetClipTransform(uint32_t skeleton_uuid, std::vector<math::float4x4>& pose, uint64_t mesh_hash_name, std::vector<float>& morph_weights);
 	void StartNextState(const std::string& trigger);
 	bool IsOnState(const std::string& state);
 private:

@@ -6,10 +6,11 @@
 #include "Module/ModuleTime.h"
 #include "ResourceManagement/Resources/StateMachine.h"
 #include "Helper/Utils.h"
+#include <cmath>
 
 #include <math.h>
 
-void AnimController::GetClipTransform(uint32_t skeleton_uuid, std::vector<math::float4x4>& pose)
+void AnimController::GetClipTransform(uint32_t skeleton_uuid, std::vector<math::float4x4>& pose, uint64_t mesh_hash_name, std::vector<float>& morph_weights)
 {
 	for (size_t j = 0; j < playing_clips.size(); j++)
 	{
@@ -18,6 +19,7 @@ void AnimController::GetClipTransform(uint32_t skeleton_uuid, std::vector<math::
 		{
 			continue;
 		}
+
 		float weight = j != ClipType::ACTIVE ? playing_clips[j].current_time / (active_transition->interpolation_time * 1.0f) : 0.0f;
 		float current_keyframe = ((playing_clips[j].current_time*(clip->animation->frames - 1)) / clip->animation_time) + 1;
 		size_t first_keyframe_index = static_cast<size_t>(std::floor(current_keyframe));
@@ -30,6 +32,21 @@ void AnimController::GetClipTransform(uint32_t skeleton_uuid, std::vector<math::
 		float interpolation_lambda = current_keyframe - std::floor(current_keyframe);
 		const std::vector<Animation::Channel>& current_pose = clip->animation->keyframes[first_keyframe_index].channels;
 		const std::vector<Animation::Channel>& next_pose = clip->animation->keyframes[second_keyframe_index].channels;
+
+		auto & morph_channels = clip->animation->morph_channels;
+		auto it = std::find_if(morph_channels.begin(), morph_channels.end(), [&mesh_hash_name](const auto & channel) { return channel.mesh_hash == mesh_hash_name; });
+		if (it != morph_channels.end() && second_keyframe_index < (*it).keyframes.size())
+		{
+			auto& keyframes = (*it).keyframes;
+			
+			auto& current_weights = keyframes[first_keyframe_index].morph_targets;
+			auto& next_weights = keyframes[second_keyframe_index].morph_targets;
+			assert(current_weights.size() == next_weights.size());
+			for (size_t i = 0; i < current_weights.size(); i++)
+			{
+				morph_weights[i] = Utils::Lerp(current_weights[i].weight, next_weights[i].weight, interpolation_lambda);
+			}
+		}
 
 		auto& joint_channels_map = clip->skeleton_channels_joints_map[skeleton_uuid];
 		for (size_t i = 0; i < joint_channels_map.size(); ++i)

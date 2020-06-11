@@ -134,6 +134,7 @@ void AnimationImporter::GetMorphingAnimation(const aiAnimation * animation, Anim
 		auto& morph_channel = animation->mMorphMeshChannels[i];
 
 		std::string mesh_name = morph_channel->mName.C_Str();
+		mesh_name = mesh_name.substr(0, mesh_name.find_first_of('*'));
 		Animation::MorphChannel own_format_morph_channel{ std::hash<std::string>{}(mesh_name) };
 		own_format_morph_channel.keyframes.reserve(morph_channel->mNumKeys);
 
