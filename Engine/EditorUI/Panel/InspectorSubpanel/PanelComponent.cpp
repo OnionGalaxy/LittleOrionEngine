@@ -152,7 +152,7 @@ void PanelComponent::ShowComponentMeshRendererWindow(ComponentMeshRenderer *mesh
 	{
 		auto& morphs_targets = mesh_renderer->mesh_to_render->morph_targets_vector;
 		int x = 0;
-		for (auto & weight : mesh_renderer->morph_testing)
+		for (auto & weight : mesh_renderer->morph_target_weights)
 		{
 			std::string target = "Morph " + std::to_string(x);
 			ImGui::SliderFloat(target.c_str(), &weight, 0.0, 1.0);

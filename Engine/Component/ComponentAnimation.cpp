@@ -154,7 +154,7 @@ void ComponentAnimation::UpdateMeshes()
 
 		pose.resize(skeleton->skeleton.size());
 
-		animation_controller->GetClipTransform(skeleton->GetUUID(), pose, mesh_resource->mesh_name_hash, mesh->morph_testing);
+		animation_controller->GetClipTransform(skeleton->GetUUID(), pose, mesh_resource->mesh_name_hash, mesh->morph_target_weights);
 		mesh->UpdatePalette(pose);
 	}
 }
