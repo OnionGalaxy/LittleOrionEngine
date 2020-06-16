@@ -40,12 +40,12 @@ Tween * Tween::LORotate(ComponentTransform2D* transform, float end_value, float 
 	return tween;
 }
 
-Tween * Tween::LOScale(ComponentTransform2D* transform, float end_scale, float desired_time)
+Tween * Tween::LOScale(ComponentTransform2D* transform, float2 end_scale, float desired_time)
 {
 	Tween* tween = new Tween();
 	tween->transform = transform;
-	tween->initial_value = 1.0f;
-	tween->desired_value = end_scale;
+	tween->initial_vector = transform->GetScale().xy();
+	tween->desired_vector = end_scale;
 	tween->duration = desired_time;
 	tween->tween_type = TweenType::SCALE;
 
@@ -112,8 +112,8 @@ float Tween::UpdateTweenByType()
 		break;
 
 	case Tween::SCALE:
-		tweened_value = math::Lerp(initial_value, desired_value, eased_time);
-		transform->SetScale(float3::one * tweened_value);
+		tweened_vector = float2::Lerp(initial_vector, desired_vector, eased_time);
+		transform->SetScale(float3(tweened_vector, 0));
 		break;
 
 	case Tween::COLOR:
@@ -214,7 +214,7 @@ void Tween::ResetTween()
 			transform->SetRotation(Quat(0, 0, initial_value, 1));
 			break;
 		case Tween::SCALE:
-			transform->SetScale(float3::one);
+			transform->SetScale(float3(initial_vector, 0.0f));
 			break;
 		case Tween::COLOR:
 			image->SetColor(initial_color);

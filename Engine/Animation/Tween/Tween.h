@@ -52,7 +52,7 @@ public:
 
 	ENGINE_API static Tween* LOTranslate(ComponentTransform2D*, float2, float);
 	ENGINE_API static Tween* LORotate(ComponentTransform2D*, float, float);
-	ENGINE_API static Tween* LOScale(ComponentTransform2D*, float, float);
+	ENGINE_API static Tween* LOScale(ComponentTransform2D*, float2, float);
 	ENGINE_API static Tween* LOColor(ComponentImage*, float4, float);
 	ENGINE_API Tween* SetEase(EaseType);
 	ENGINE_API Tween* SetLoops(int, TweenLoop);
