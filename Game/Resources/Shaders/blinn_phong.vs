@@ -96,9 +96,13 @@ void main()
 
 	//Morphing
 	vec3 morph_position = vec3(0);
+	vec3 morph_normal = vec3(0);
+	vec3 morph_tangent = vec3(0);
     for(uint i=0; i<num_morph_targets; i++)
 	{
 		morph_position += morph_weights[i] * (morph_targets[(i * num_vertices) + vertex_index].position.rgb- vertex_position);
+		morph_normal += morph_weights[i] * (morph_targets[(i * num_vertices) + vertex_index].normal.rgb- vertex_position);
+		morph_tangent += morph_weights[i] * (morph_targets[(i * num_vertices) + vertex_index].tangent.rgb- vertex_position);
 	}
 
 // General variables
@@ -106,8 +110,8 @@ void main()
 	texCoordLightmap = vertex_uv1;
 
 	position = (matrices.model*skinning_matrix*vec4(vertex_position + morph_position, 1.0)).xyz;
-	normal = (matrices.model*skinning_matrix*vec4(vertex_normal, 0.0)).xyz;
-	tangent = (matrices.model*skinning_matrix*vec4(vertex_tangent, 0.0)).xyz;
+	normal = (matrices.model*skinning_matrix*vec4(vertex_normal + morph_normal, 0.0)).xyz;
+	tangent = (matrices.model*skinning_matrix*vec4(vertex_tangent + morph_tangent, 0.0)).xyz;
 
 	view_pos    = transpose(mat3(matrices.view)) * (-matrices.view[3].xyz);
 	view_dir    = normalize(view_pos - position);
