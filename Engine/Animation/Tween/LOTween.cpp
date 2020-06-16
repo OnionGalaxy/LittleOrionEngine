@@ -19,16 +19,10 @@ void LOTween::Update(float dt)
 	for (std::vector<TweenSequence*>::reverse_iterator it = sequences.rbegin(); it != sequences.rend(); ++it)
 	{
 		TweenSequence* sequence = (*it);
+
+		if (sequence->state == TweenSequence::TweenSequenceState::STOPPED) continue;
+
 		sequence->Update(dt);
-
-		if (sequence->state == TweenSequence::TweenSequenceState::STOPPED)
-		{
-			sequences.erase(sequences.begin() + pos);
-			pos -= 1;
-
-			delete(sequence);
-		}
-		pos += 1;
 	}
 }
 

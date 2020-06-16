@@ -31,6 +31,7 @@ bool ModuleAnimation::CleanUp()
 	}
 	animations.clear();
 
+	tweener->Reset();
 	delete(tweener);
 
 	return true;
