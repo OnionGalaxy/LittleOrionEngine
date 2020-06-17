@@ -9,7 +9,7 @@ class LOTween
 {
 public:
 	ENGINE_API TweenSequence* CreateSequence();
-	void Update(float);
+	void Update(float delta_time);
 	void Reset();
 
 private:

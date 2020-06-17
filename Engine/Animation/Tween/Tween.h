@@ -50,12 +50,12 @@ public:
 	//void OnUpdate();
 	//void OnComplete();
 
-	ENGINE_API static Tween* LOTranslate(ComponentTransform2D*, float2, float);
-	ENGINE_API static Tween* LORotate(ComponentTransform2D*, float, float);
-	ENGINE_API static Tween* LOScale(ComponentTransform2D*, float2, float);
-	ENGINE_API static Tween* LOColor(ComponentImage*, float4, float);
-	ENGINE_API Tween* SetEase(EaseType);
-	ENGINE_API Tween* SetLoops(int, TweenLoop);
+	ENGINE_API static Tween* LOTranslate(ComponentTransform2D* transform_2d, float2 end_position, float time);
+	ENGINE_API static Tween* LORotate(ComponentTransform2D* transform_2d, float end_rotation, float time);
+	ENGINE_API static Tween* LOScale(ComponentTransform2D* transform_2d, float2 end_scale, float time);
+	ENGINE_API static Tween* LOColor(ComponentImage* image, float4 end_color, float time);
+	ENGINE_API Tween* SetEase(EaseType ease_type);
+	ENGINE_API Tween* SetLoops(int loops, TweenLoop loop_type);
 
 private:
 	float start_time = 0.0f;
@@ -94,15 +94,15 @@ private:
 	void ResetTween();
 	void IncrementTween();
 
-	float Linear(float) const;
-	float SmoothStep(float) const;
-	float EaseInSine(float) const;
-	float Sine(float) const;
-	float EaseOutSine(float) const;
-	float EaseInOutSine(float) const;
-	float EaseInBack(float) const;
-	float EaseOutBack(float) const;
-	float EaseInOutBack(float) const;
+	float Linear(float time) const;
+	float SmoothStep(float time) const;
+	float EaseInSine(float time) const;
+	float Sine(float time) const;
+	float EaseOutSine(float time) const;
+	float EaseInOutSine(float time) const;
+	float EaseInBack(float time) const;
+	float EaseOutBack(float time) const;
+	float EaseInOutBack(float time) const;
 
 	friend class TweenSequence;
 };

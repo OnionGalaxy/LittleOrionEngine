@@ -13,9 +13,9 @@ public:
 		PLAYING, PAUSED, STOPPED, DISABLED
 	};
 
-	ENGINE_API TweenSequence* Append(Tween*);
-	ENGINE_API TweenSequence* Join(Tween*);
-	ENGINE_API TweenSequence* Insert(float, Tween*);
+	ENGINE_API TweenSequence* Append(Tween* tween);
+	ENGINE_API TweenSequence* Join(Tween* tween);
+	ENGINE_API TweenSequence* Insert(float insert_time, Tween* tween);
 
 	ENGINE_API TweenSequence* Play();
 	ENGINE_API TweenSequence* Stop();
