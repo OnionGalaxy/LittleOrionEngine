@@ -180,7 +180,10 @@ void ComponentParticleSystem::Render()
 				{
 					billboard->Render(p.position);
 				}
-				
+
+					p.current_sprite_x = billboard->current_sprite_x;
+					p.current_sprite_y = billboard->current_sprite_y;
+
 			}
 		}
 	}
@@ -194,12 +197,10 @@ void ComponentParticleSystem::UpdateParticle(Particle& particle)
 	time_spend -= particle.life;
 	particle.position += particle.velocity * App->time->real_time_delta_time;
 
-	//random tile
-	if (tile_random)
-	{
-		billboard->current_sprite_x = particle.current_sprite_x;
-		billboard->current_sprite_y = particle.current_sprite_y;
-	}
+
+	billboard->current_sprite_x = particle.current_sprite_x;
+	billboard->current_sprite_y = particle.current_sprite_y;
+
 
 	//alpha fade
 	if (fade)
