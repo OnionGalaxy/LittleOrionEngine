@@ -178,7 +178,6 @@ void ComponentAnimation::UpdateMeshes()
 	{
 		auto & skeleton = mesh->skeleton;
 		animation_controller->GetClipTransform(skeleton, pose, mesh->mesh_to_render->mesh_name_hash, mesh->morph_target_weights);
-
 		mesh->UpdatePalette(pose);
 		animation_controller->UpdateAttachedBones(skeleton, pose);
 	}

@@ -48,7 +48,6 @@ public:
 	void GetClipTransform(const std::shared_ptr<Skeleton>& skeleton, std::vector<math::float4x4>& pose, uint64_t mesh_hash_name, std::vector<float>& morph_weights);
 	void UpdateAttachedBones(const std::shared_ptr<Skeleton>& skeleton, const std::vector<math::float4x4>& palette);
 
-
 	void StartNextState(const std::string& trigger);
 	bool IsOnState(const std::string& state);
 	void SetSpeed(float speed);

@@ -37,30 +37,6 @@ layout (std140) uniform Matrices
 	mat4 view;
 } matrices;
 
-struct Material {
-	sampler2D diffuse_map;
-	vec4 diffuse_color;
-	float k_diffuse;
-	sampler2D specular_map;
-	vec4 specular_color;
-	float k_specular;
-	sampler2D occlusion_map;
-	float k_ambient;
-	sampler2D emissive_map;
-	vec4 emissive_color;
-	sampler2D normal_map;
-	sampler2D light_map;
-
-	float roughness;
-	float metalness;
-	float transparency;
-	float tiling_x;
-	float tiling_y;
-	bool use_normal_map;
-};
-
-uniform Material material;
-
 uniform int time;
 
 out vec2 texCoord;
