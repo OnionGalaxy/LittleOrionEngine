@@ -71,7 +71,7 @@ void Mesh::LoadInMemory()
 	// VERTEX TANGENT
 	glEnableVertexAttribArray(3);
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, tangent));
-	
+
 	// VERTEX JOINTS
 	glEnableVertexAttribArray(4);
 	glVertexAttribIPointer(4, 4, GL_UNSIGNED_INT, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, joints));

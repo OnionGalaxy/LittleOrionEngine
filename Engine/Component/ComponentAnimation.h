@@ -1,9 +1,12 @@
 #ifndef _COMPONENTANIMATION_H_
 #define _COMPONENTANIMATION_H_
 
+#define ENGINE_EXPORTS
+
 #include "Component.h"
 
 #include "EditorUI/Panel/InspectorSubpanel/PanelComponent.h"
+#include "ResourceManagement/Resources/Skeleton.h"
 
 #include <GL/glew.h>
 #include <memory>
@@ -35,13 +38,16 @@ public:
 	void Disable() override;
 
 	void SetStateMachine(uint32_t state_machine_uuid);
-
+	//to find it from NodeEditor
+	AnimController* GetAnimController();
 	//API
 	ENGINE_API void Play();
 	ENGINE_API void Stop();
 	ENGINE_API void ActiveAnimation(const std::string & trigger);
 	ENGINE_API bool IsOnState(const std::string & trigger);
 	ENGINE_API float GetCurrentClipPercentatge() const;
+	ENGINE_API int GetTotalAnimationTime() const;
+	ENGINE_API void SetAnimationSpeed(float speed) const;
 
 	void Update() override;
 	void UpdateMeshes();
@@ -50,16 +56,17 @@ public:
 	void SpecializedSave(Config& config) const override;
 	void SpecializedLoad(const Config& config) override;
 
+	
+	bool playing = false;
 private:
 	void GetChildrenMeshes(GameObject * current_mesh);
 	void GenerateJointChannelMaps();
-
+	void GenerateAttachedBones(GameObject* mesh, std::vector<Skeleton::Joint> & skeleton);
 private:
 	std::vector<ComponentMeshRenderer*> skinned_meshes;
 	AnimController* animation_controller = nullptr;
 	std::vector<float4x4> pose;
-	bool playing = false;
-
+	
 	friend class PanelComponent;
 	
 };

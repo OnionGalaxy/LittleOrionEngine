@@ -14,6 +14,9 @@ public:
 	{
 		AABB = 0,
 		ANIMATION = 8,
+		AUDIO_LISTENER = 20,
+		AUDIO_SOURCE = 14,
+		BILLBOARD = 16,
 		CAMERA = 1,
 		CANVAS = 5,
 		COLLIDER = 9,
@@ -26,13 +29,13 @@ public:
 		CANVAS_RENDERER = 10,
 		UI_BUTTON = 11,
 		UI_IMAGE = 12,
+		UI_SPRITE_MASK = 18,
 		UI_TEXT = 13,
-		AUDIO_SOURCE = 14,
-		BILLBOARD = 16,
-		PARTICLE_SYSTEM = 17
+		PARTICLE_SYSTEM = 17,
+		TRAIL = 19
 	};
 
-	Component();
+	Component() = default;
 	Component(ComponentType componentType) : owner(owner), type(componentType), UUID(pcg32_random()) {};
 	Component(GameObject * owner, ComponentType componentType) : owner(owner), type(componentType), UUID(pcg32_random()) {};
 	virtual ~Component() = default;

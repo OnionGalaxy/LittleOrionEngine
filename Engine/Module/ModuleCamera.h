@@ -29,6 +29,7 @@ public:
 
 	bool IsSceneCameraMoving() const;
 
+
 private:
 	void SelectMainCamera();
 
@@ -38,13 +39,22 @@ private:
 	void HandleSceneCameraMovements();
 	
 public:
-	ComponentCamera *scene_camera = nullptr;
+	ComponentCamera* scene_camera = nullptr;
 	ComponentCamera* main_camera = nullptr;
+
+	float aux_width = 25;
+	float aux_height = 25;
+
+	float close_mid_separation = 25;
+	float mid_far_separation = 50;
+	float far_plane = 75;
 
 	std::shared_ptr<Skybox> world_skybox = nullptr;
 
 private:
 	GameObject *scene_camera_game_object = nullptr;
+	
+
 
 	bool movement_enabled = false;
 	bool game_window_is_hovered = false;

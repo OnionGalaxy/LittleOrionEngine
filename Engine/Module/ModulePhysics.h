@@ -36,11 +36,9 @@ class ModulePhysics : public Module
 public:
 	
 	ModulePhysics();
-	~ModulePhysics();
+	~ModulePhysics() = default;
 
 	bool Init() override;
-	bool CleanUp() override;
-	update_status PreUpdate() override;
 	update_status Update() override;
 
 	void SetGravity(float3& newGgravity);
@@ -48,10 +46,7 @@ public:
 
 	ComponentCollider* CreateComponentCollider(const ComponentCollider::ColliderType collider_type, GameObject* owner);
 	void RemoveComponentCollider(ComponentCollider* collider_to_remove);
-
-	ENGINE_API bool RaycastWorld(const btVector3 &Start, btVector3 &End, btVector3 &Normal);
-	ENGINE_API int GetRaycastWorldId(const btVector3& start, btVector3& end, btVector3& normal);
-
+	ComponentCollider* FindColliderByWorldId(int id);
 	void UpdateAllDimensions();
 
 public:

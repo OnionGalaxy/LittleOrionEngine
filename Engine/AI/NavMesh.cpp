@@ -6,6 +6,7 @@
 #include "EditorUI/DebugDraw.h"
 
 #include "Filesystem/PathAtlas.h"
+#include "Log/EngineLog.h"
 
 #include "Main/Application.h"
 #include "Module/ModuleCamera.h"
@@ -867,7 +868,7 @@ void NavMesh::GetNormalsScene()
 	//Clear normals vector
 	normals_vec.clear();
 
-	for (const const auto&  mesh : App->renderer->meshes)
+	for (const auto&  mesh : App->renderer->meshes)
 	{
 		for (size_t i = 0; i < mesh->mesh_to_render.get()->vertices.size(); ++i)
 		{

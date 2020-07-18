@@ -1,12 +1,12 @@
 #ifndef _MODULEUI_H_
 #define _MODULEUI_H_
-#define ENGINE_EXPORTS
 
 #include "Module.h"
 #include "Main/Globals.h"
 
 #include <iostream>
 #include <map>
+#include <vector>
 #include <GL/glew.h>
 
 class Component;
@@ -25,7 +25,6 @@ public:
 
 	bool Init() override;
 	update_status Update() override;
-	bool CleanUp() override;
 
 	void Render(bool scene_mode);
 

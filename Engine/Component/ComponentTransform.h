@@ -55,6 +55,7 @@ public:
 
 	ENGINE_API float3 GetScale() const;
 	ENGINE_API void SetScale(const float3& scale);
+	ENGINE_API void SetGlobalMatrixScale(const float3& scale);
 	float3 GetGlobalScale() const;
 
 	ENGINE_API float3 GetUpVector() const;
@@ -66,7 +67,7 @@ public:
 	float4x4 GetModelMatrix() const;
 
 	void GenerateGlobalModelMatrix();
-	float4x4 GetGlobalModelMatrix() const;
+	ENGINE_API float4x4 GetGlobalModelMatrix() const;
 	virtual void SetGlobalModelMatrix(const float4x4& new_global_matrix);
 
 protected:

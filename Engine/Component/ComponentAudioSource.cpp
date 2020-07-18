@@ -1,5 +1,6 @@
 #include "ComponentAudioSource.h"
 
+#include "Log/EngineLog.h"
 #include "Main/Application.h"
 #include "Main/GameObject.h"
 #include "Module/ModuleAudio.h"
@@ -27,9 +28,18 @@ void ComponentAudioSource::Update()
 {
 	if (sound_3d)
 	{
-		const math::float3 owner_transform = owner->transform.GetTranslation();
-		sound_position.SetPosition(owner_transform.x, owner_transform.y, owner_transform.z);
-		AK::SoundEngine::SetPosition(gameobject_source, sound_position);
+		const math::float3 owner_transform = owner->transform.GetGlobalTranslation();
+		source_transform.SetPosition(owner_transform.x, owner_transform.y, owner_transform.z);
+
+		const math::float3 front_vector = owner->transform.GetFrontVector();
+		AkVector orientation_front{ front_vector.x, front_vector.y, -front_vector.z };
+
+		const math::float3 top_vector = owner->transform.GetUpVector();
+		AkVector orientation_top{ top_vector.x, top_vector.y, -top_vector.z };
+
+		source_transform.SetOrientation(orientation_front, orientation_top);
+
+		AK::SoundEngine::SetPosition(gameobject_source, source_transform);
 	}
 }
 
@@ -48,11 +58,15 @@ void ComponentAudioSource::SetSoundBank(uint32_t uuid)
 void ComponentAudioSource::SetVolume(float volume)
 {
 	this->volume = volume;
-	AK::SoundEngine::SetGameObjectOutputBusVolume(gameobject_source,App->audio->main_sound_gameobject,volume);
+	if (App->audio->default_listener)
+	{
+		AK::SoundEngine::SetGameObjectOutputBusVolume(gameobject_source, App->audio->default_listener, volume);
+	}
 }
 
-ENGINE_API unsigned long ComponentAudioSource::PlayEvent(const std::string & event_to_play)
+unsigned long ComponentAudioSource::PlayEvent(const std::string & event_to_play)
 {
+	last_played_event = event_to_play;
 	AkPlayingID playing_id = AK::SoundEngine::PostEvent(event_to_play.c_str(), gameobject_source);
 	if (playing_id == AK_INVALID_PLAYING_ID)
 	{
@@ -63,7 +77,7 @@ ENGINE_API unsigned long ComponentAudioSource::PlayEvent(const std::string & eve
 	return playing_id;
 }
 
-ENGINE_API void ComponentAudioSource::StopEvent(const std::string & event_to_stop)
+void ComponentAudioSource::StopEvent(const std::string & event_to_stop)
 {
 	AkUInt32 event_id = AK::SoundEngine::GetIDFromString(event_to_stop.c_str());
 	if (event_playing_ids.find(event_id) != event_playing_ids.end())
@@ -72,12 +86,12 @@ ENGINE_API void ComponentAudioSource::StopEvent(const std::string & event_to_sto
 	}
 }
 
-ENGINE_API void ComponentAudioSource::StopEvent(unsigned long playing_id_to_stop)
+void ComponentAudioSource::StopEvent(unsigned long playing_id_to_stop)
 {
 	AK::SoundEngine::StopPlayingID(playing_id_to_stop);
 }
 
-ENGINE_API void ComponentAudioSource::StopAll()
+void ComponentAudioSource::StopAll()
 {
 	AK::SoundEngine::StopAll(gameobject_source);
 }
@@ -110,16 +124,45 @@ void ComponentAudioSource::SpecializedSave(Config& config) const
 	uint32_t soundbank_uuid = soundbank ? soundbank->GetUUID() : 0;
 	config.AddUInt(soundbank_uuid, "SoundBank");
 	config.AddBool(sound_3d, "3DSound");
+	config.AddBool(play_on_awake, "PlayOnAwake");
+	config.AddString(awake_event, "AwakeEvent");
 }
 
 void ComponentAudioSource::SpecializedLoad(const Config& config)
 {
 	volume = config.GetFloat("Volume", 1);
 	sound_3d = config.GetBool("3DSound", false);
-	uint32_t soundbank_uuid = config.GetUInt("SoundBank", 0);
+	play_on_awake = config.GetBool("PlayOnAwake", false);
+	config.GetString("AwakeEvent", awake_event, "");
+
+	uint32_t soundbank_uuid = config.GetUInt32("SoundBank", 0);
 	if (soundbank_uuid != 0)
 	{
 		SetSoundBank(soundbank_uuid);
 	}
 	SetVolume(volume);
+}
+
+void ComponentAudioSource::Disable() 
+{
+	StopAll();
+	AK::SoundEngine::UnregisterGameObj(gameobject_source);
+}
+
+void ComponentAudioSource::Enable()
+{
+	if (!AK::SoundEngine::RegisterGameObj(gameobject_source))
+	{
+		APP_LOG_ERROR("Unable to register sound gameobject");
+	}
+	else if (last_played_event!="")
+	{
+		PlayEvent(last_played_event);
+	}
+
+}
+
+void ComponentAudioSource::SetListener(const AkGameObjectID listener_AkId)
+{
+	AK::SoundEngine::SetListeners(gameobject_source, &listener_AkId, 1);
 }

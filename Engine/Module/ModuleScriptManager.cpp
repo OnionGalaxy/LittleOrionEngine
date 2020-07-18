@@ -5,6 +5,7 @@
 #include "Filesystem/Path.h"
 #include "Filesystem/PathAtlas.h"
 #include "Helper/Utils.h"
+#include "Log/EngineLog.h"
 #include "Main/Application.h"
 #include "Main/GameObject.h"
 #include "Module/ModuleFileSystem.h"
@@ -29,12 +30,12 @@ bool ModuleScriptManager::Init()
 
 update_status ModuleScriptManager::Update()
 {
-	
+	BROFILER_CATEGORY("Module Script Update", Profiler::Color::Navy);
 	if (App->time->isGameRunning()) 
 	{
 		for (size_t i = 0; i < scripts.size(); ++i)
 		{
-			BROFILER_CATEGORY("AwakeScript", Profiler::Color::Lavender);
+			BROFILER_CATEGORY("AwakeScript", Profiler::Color::CadetBlue);
 			if (!scripts[i]->awaken)
 			{
 				scripts[i]->AwakeScript();
@@ -43,7 +44,7 @@ update_status ModuleScriptManager::Update()
 
 		for (size_t i = 0; i < scripts.size(); ++i)
 		{
-			BROFILER_CATEGORY("StartScript", Profiler::Color::Lavender);
+			BROFILER_CATEGORY("StartScript", Profiler::Color::DeepSkyBlue);
 			if (scripts[i]->awaken && !scripts[i]->started)
 			{
 				scripts[i]->StartScript();
@@ -213,7 +214,6 @@ void ModuleScriptManager::ReloadDLL()
 	{
 		dll->ReloadDLL();
 		RemoveScriptPointers();
-		dll->InitDLL();
 	}
 	dll->InitFolderTimestamps();
 	InitResourceScript();

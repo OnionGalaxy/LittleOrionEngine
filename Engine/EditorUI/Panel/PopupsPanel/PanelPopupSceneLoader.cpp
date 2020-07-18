@@ -1,5 +1,6 @@
 #include "PanelPopupSceneLoader.h"
 
+#include "Log/EngineLog.h"
 #include "Main/Application.h"
 #include "Module/ModuleEditor.h"
 #include "Module/ModuleFileSystem.h"
@@ -75,8 +76,7 @@ void PanelPopupSceneLoader::Render()
 		{
 			APP_LOG_INFO("Loading %s scene.", GetSelected())
 		
-			App->editor->OpenScene(GetSelected());
-			App->editor->current_scene_path = GetSelected();
+			App->scene->LoadScene(GetSelected());
 		}
 		else
 		{

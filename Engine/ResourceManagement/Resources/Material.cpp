@@ -2,8 +2,13 @@
 
 #include "Helper/Config.h"
 #include "Main/Application.h"
-#include "Module/ModuleTexture.h"
+
+#include "Module/ModuleLight.h"
+#include "Module/ModuleProgram.h"
 #include "Module/ModuleResourceManager.h"
+#include "Module/ModuleTexture.h"
+#include "Module/ModuleTime.h"
+
 
 #include "ResourceManagement/Metafile/Metafile.h"
 
@@ -40,8 +45,25 @@ void Material::Save(Config& config) const
 		case MaterialTextureType::NORMAL:
 			config.AddUInt(textures_uuid[i],  "Normal");
 			break;
+
 		case MaterialTextureType::LIGHTMAP:
 			config.AddUInt(textures_uuid[i], "Lightmap");
+			break;
+
+		case MaterialTextureType::LIQUID:
+			config.AddUInt(textures_uuid[i], "Liquid");
+			break;
+
+		case MaterialTextureType::NOISE:
+			config.AddUInt(textures_uuid[i], "Noise");
+			break;
+
+		case MaterialTextureType::DISSOLVED_DIFFUSE:
+			config.AddUInt(textures_uuid[i], "Dissolved Diffuse");
+			break;
+
+		case MaterialTextureType::DISSOLVED_EMISSIVE:
+			config.AddUInt(textures_uuid[i], "Dissolved Emissive");
 			break;
 		default:
 			break;
@@ -54,19 +76,15 @@ void Material::Save(Config& config) const
 	config.AddBool(show_checkerboard_texture, "Checkboard");
 	config.AddString(shader_program, "ShaderProgram");
 
-	//k
-	config.AddFloat(k_ambient, "kAmbient");
-	config.AddFloat(k_specular, "kSpecular");
-	config.AddFloat(k_diffuse, "kDiffuse");
+	config.AddFloat(smoothness, "Smoothness");
 
 	config.AddFloat(transparency, "Transparency");
-//	config.AddFloat(roughness, "Roughness");
-//	config.AddFloat(metalness, "Metalness");
 
-	config.AddFloat(tiling_x, "Tiling X");
-	config.AddFloat(tiling_y, "Tiling Y");
 
-	config.AddBool(use_normal_map, "UseNormalMap");
+	config.AddFloat2(tiling, "Tiling");
+
+	//liquid properties
+	config.AddFloat2(liquid_tiling_speed, "Liquid Tiling Speed");
 
 	//colors
 	config.AddColor(float4(diffuse_color[0], diffuse_color[1], diffuse_color[2], diffuse_color[3]), "difusseColor");
@@ -76,27 +94,29 @@ void Material::Save(Config& config) const
 
 void Material::Load(const Config& config)
 {
-	SetMaterialTexture(MaterialTextureType::DIFFUSE, config.GetUInt("Diffuse", 0));
-	SetMaterialTexture(MaterialTextureType::SPECULAR, config.GetUInt("Specular", 0));
-	SetMaterialTexture(MaterialTextureType::OCCLUSION, config.GetUInt("Occlusion", 0));
-	SetMaterialTexture(MaterialTextureType::EMISSIVE, config.GetUInt("Emissive", 0));
-	SetMaterialTexture(MaterialTextureType::NORMAL, config.GetUInt("Normal", 0));
-	SetMaterialTexture(MaterialTextureType::LIGHTMAP, config.GetUInt("Lightmap", 0));
+	SetMaterialTexture(MaterialTextureType::DIFFUSE, config.GetUInt32("Diffuse", 0));
+	SetMaterialTexture(MaterialTextureType::SPECULAR, config.GetUInt32("Specular", 0));
+	SetMaterialTexture(MaterialTextureType::OCCLUSION, config.GetUInt32("Occlusion", 0));
+	SetMaterialTexture(MaterialTextureType::EMISSIVE, config.GetUInt32("Emissive", 0));
+	SetMaterialTexture(MaterialTextureType::NORMAL, config.GetUInt32("Normal", 0));
+	SetMaterialTexture(MaterialTextureType::LIGHTMAP, config.GetUInt32("Lightmap", 0));
+	SetMaterialTexture(MaterialTextureType::DISSOLVED_DIFFUSE, config.GetUInt32("Dissolved Diffuse", 0));
+	SetMaterialTexture(MaterialTextureType::DISSOLVED_EMISSIVE, config.GetUInt32("Dissolved Emissive", 0));
+	SetMaterialTexture(MaterialTextureType::NOISE, config.GetUInt32("Noise", 0));
 
 	show_checkerboard_texture = config.GetBool("Checkboard", true);
 	config.GetString("ShaderProgram", shader_program, "Blinn phong");
 
 	material_type = static_cast<MaterialType>(config.GetInt("MaterialType", 0));
 
-	//k
-	k_ambient = config.GetFloat("kAmbient", 1.0f);
-	k_specular = config.GetFloat("kSpecular", 1.0f);
-	k_diffuse = config.GetFloat("kDiffuse", 1.0f);
-
 	transparency = config.GetFloat("Transparency", 1.f);
+	smoothness = config.GetFloat("Smoothness", 1.0F);
 
-	tiling_x = config.GetFloat("Tiling X", 1.0f);
-	tiling_y = config.GetFloat("Tiling Y", 1.0f);
+
+	config.GetFloat2("Tiling", tiling, float2::one);
+
+	//liquid properties
+	config.GetFloat2("Liquid Tiling Speed", liquid_tiling_speed, float2::one);
 
 	//colors
 	float4 diffuse;
@@ -105,7 +125,7 @@ void Material::Load(const Config& config)
 
 	config.GetColor("difusseColor", diffuse, float4(1.f, 1.f, 1.f, 1.f));
 	config.GetColor("emissiveColor", emissive, float4(0.0f, 0.0f, 0.0f, 1.0f));
-	config.GetColor("specularColor", specular, float4(0.0f, 0.0f, 0.0f, 1.0f));
+	config.GetColor("specularColor", specular, float4(0.025f, 0.025f, 0.025f, 0.025f));
 
 	diffuse_color[0] = diffuse.x;
 	diffuse_color[1] = diffuse.y;
@@ -126,6 +146,7 @@ void Material::Load(const Config& config)
 void Material::RemoveMaterialTexture(MaterialTextureType type)
 {
 	textures[type] = nullptr;
+	
 }
 
 void Material::SetMaterialTexture(MaterialTextureType type, uint32_t texture_uuid)
@@ -135,7 +156,6 @@ void Material::SetMaterialTexture(MaterialTextureType type, uint32_t texture_uui
 	{
 		textures[type] = App->resources->Load<Texture>(texture_uuid);
 	}
-	use_normal_map = type == MaterialTextureType::NORMAL && texture_uuid !=0;
 }
 
 const std::shared_ptr<Texture>& Material::GetMaterialTexture(MaterialTextureType type) const
@@ -152,10 +172,54 @@ std::string Material::GetMaterialTypeName(const MaterialType material_type)
 {
 	switch (material_type)
 	{
-	case MaterialType::MATERIAL_OPAQUE:
-		return "Opaque";
+		case MaterialType::MATERIAL_OPAQUE:
+			return "Opaque";
 
-	case MaterialType::MATERIAL_TRANSPARENT:
-		return "Transparent";
+		case MaterialType::MATERIAL_TRANSPARENT:
+			return "Transparent";
+
+		case MaterialType::MATERIAL_LIQUID:
+			return "Liquid";
+
+		case MaterialType::MATERIAL_DISSOLVING:
+			return "Dissolving";
+
+		default:
+			return "";
 	}
+}
+
+void Material::UpdateLiquidProperties()
+{
+	liquid_horizontal_normals_tiling += float2(liquid_tiling_speed.x * App->time->delta_time * 0.001f);
+	liquid_vertical_normals_tiling += float2(liquid_tiling_speed.y * App->time->delta_time * 0.001f);
+}
+
+unsigned int Material::GetShaderVariation() const
+{
+	unsigned int variation = 0;
+	if (textures[MaterialTextureType::SPECULAR] != nullptr)
+	{
+		variation |= static_cast<unsigned int>(ModuleProgram::ShaderVariation::ENABLE_SPECULAR_MAP);
+	}
+	if (textures[MaterialTextureType::NORMAL] != nullptr)
+	{
+		variation |= static_cast<unsigned int>(ModuleProgram::ShaderVariation::ENABLE_NORMAL_MAP);
+	}
+	if (material_type == MaterialType::MATERIAL_LIQUID)
+	{
+		variation |= static_cast<unsigned int>(ModuleProgram::ShaderVariation::ENABLE_LIQUID_PROPERTIES);
+		variation |= static_cast<unsigned int>(ModuleProgram::ShaderVariation::ENABLE_DISSOLVING_PROPERTIES);
+	}
+	if (material_type == MaterialType::MATERIAL_DISSOLVING)
+	{
+		variation |= static_cast<unsigned int>(ModuleProgram::ShaderVariation::ENABLE_DISSOLVING_PROPERTIES);
+	}
+
+	return variation;
+}
+
+void Material::SetDissolveProgress(float progress)
+{
+	dissolve_progress = progress;
 }

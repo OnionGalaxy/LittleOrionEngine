@@ -1,5 +1,6 @@
 #include "Application.h"
-#include "EditorUI/EngineLog.h"
+#include "Log/EngineLog.h"
+#include "Event/EventManager.h"
 #include "Module/ModuleActions.h"
 #include "Module/ModuleAI.h"
 #include "Module/ModuleAudio.h"
@@ -8,6 +9,7 @@
 #include "Module/ModuleDebug.h"
 #include "Module/ModuleDebugDraw.h"
 #include "Module/ModuleEditor.h"
+#include "Module/ModuleEffects.h"
 #include "Module/ModuleFileSystem.h"
 #include "Module/ModuleInput.h"
 #include "Module/ModuleLight.h"
@@ -38,6 +40,7 @@ Application::Application()
 	modules.emplace_back(time = new ModuleTime());
 	modules.emplace_back(texture = new ModuleTexture());
 	modules.emplace_back(renderer = new ModuleRender());
+	modules.emplace_back(effects = new ModuleEffects());
 	modules.emplace_back(animations = new ModuleAnimation());
 	modules.emplace_back(editor = new ModuleEditor());
 	modules.emplace_back(actions = new ModuleActions());
@@ -54,6 +57,7 @@ Application::Application()
 	modules.emplace_back(debug_draw = new ModuleDebugDraw());
 		
 	engine_log = std::make_unique<EngineLog>();
+	event_manager = std::make_unique<EventManager>();
 }
 
 Application::~Application()

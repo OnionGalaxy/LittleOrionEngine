@@ -62,19 +62,18 @@ void PanelMenuBar::ShowFileMenu()
 	{
 		if (ImGui::MenuItem(ICON_FA_FILE " New Scene"))
 		{
-			App->editor->current_scene_path = "";
-			App->editor->OpenScene(DEFAULT_SCENE_PATH);
+			App->scene->OpenNewScene();
 		}
 		if (ImGui::MenuItem(ICON_FA_FOLDER_OPEN " Load Scene"))
 		{
 			App->editor->popups->scene_loader_popup.popup_shown = true;
 		}
 		ImGui::Separator();
-		if (App->editor->current_scene_path != "" && ImGui::MenuItem(ICON_FA_SAVE " Save Scene"))
+		if (App->scene->CurrentSceneIsSaved() && ImGui::MenuItem(ICON_FA_SAVE " Save Scene"))
 		{
 			if (!App->time->isGameRunning())
 			{
-				App->editor->SaveScene(App->editor->current_scene_path);
+				App->scene->SaveScene();
 			}
 			else
 			{
@@ -168,6 +167,25 @@ void PanelMenuBar::ShowGameObjectMenu()
 				GameObject* created_game_object = App->scene->CreateGameObject();
 				created_game_object->name = "Point Light";
 				created_game_object->CreateComponent(Component::ComponentType::LIGHT);
+			}
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Effects"))
+		{
+			if (ImGui::Selectable("Particle System"))
+			{
+				GameObject* created_game_object = App->scene->CreateGameObject();
+				created_game_object->name = "Particle System";
+				created_game_object->CreateComponent(Component::ComponentType::PARTICLE_SYSTEM);
+			}
+
+			if (ImGui::Selectable("Trail"))
+			{
+				GameObject* created_game_object = App->scene->CreateGameObject();
+				created_game_object->name = "Trail";
+				created_game_object->CreateComponent(Component::ComponentType::TRAIL);
 			}
 
 			ImGui::EndMenu();

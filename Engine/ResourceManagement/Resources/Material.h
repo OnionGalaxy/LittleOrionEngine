@@ -16,20 +16,26 @@ class Material : public Resource
 public:
 	enum class MaterialType
 	{
-		MATERIAL_OPAQUE,
-		MATERIAL_TRANSPARENT,
-		UNKNOWN
+		MATERIAL_OPAQUE = 0,
+		MATERIAL_TRANSPARENT = 1,
+		MATERIAL_DISSOLVING = 2,
+		MATERIAL_LIQUID = 3,
+		UNKNOWN = 4
 	};
 
 	enum MaterialTextureType
 	{
-		DIFFUSE,
-		SPECULAR,
-		EMISSIVE,
-		OCCLUSION,
-		NORMAL,
-		LIGHTMAP,
-		UNKNOWN
+		DIFFUSE = 0,
+		SPECULAR = 1,
+		EMISSIVE = 2,
+		OCCLUSION = 3,
+		NORMAL = 4,
+		LIGHTMAP = 5,
+		LIQUID = 6,
+		DISSOLVED_DIFFUSE = 7,
+		DISSOLVED_EMISSIVE = 8,
+		NOISE = 9,
+		UNKNOWN = 10
 	};
 
 	Material() = default;
@@ -47,6 +53,11 @@ public:
 	void ChangeTypeOfMaterial(const MaterialType new_material_type);
 	static std::string GetMaterialTypeName(const MaterialType material_type);
 
+	void UpdateLiquidProperties();
+	unsigned int GetShaderVariation() const;
+
+	ENGINE_API void SetDissolveProgress(float progress);
+
 
 public:
 	static const size_t MAX_MATERIAL_TEXTURE_TYPES = static_cast<size_t>(MaterialTextureType::UNKNOWN);
@@ -60,23 +71,20 @@ public:
 	std::vector<std::shared_ptr<Texture>> textures;
 
 	float diffuse_color[4] = { 1.0f, 1.0f,1.0f,1.0f };
-	float emissive_color[4] = { 0.0f, 0.0f, 0.0f , 1.0f };
-	float specular_color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	float k_diffuse = 1.0f;
-	float k_specular = 1.0f;
-	float k_ambient = 1.0f;
-
-	float2 coords = float2(1.0f, 1.0f);
+	float emissive_color[4] = { 1.0f, 1.0f, 1.0f , 1.0f };
+	float specular_color[4] = { 0.025f, 0.025f, 0.025f, 0.025f };
+	float smoothness = 1.0F;
 
 	float transparency = 0.5F;
-//	float roughness = 0.5f;
-//	float metalness = 0.04f;
 
-	float tiling_x = 1.0f;
-	float tiling_y = 1.0f;
+	float2 tiling = float2::one;
 
-	//This variable will allow the shader to use the normal maps if there is any assigned to the model material
-	bool use_normal_map = false;
+	//liquid material
+	float2 liquid_tiling_speed = float2::one;
+	float2 liquid_horizontal_normals_tiling = float2::one;
+	float2 liquid_vertical_normals_tiling = -float2::one;
+
+	float dissolve_progress = 0.f;
 
 	bool show_checkerboard_texture = false;
 };

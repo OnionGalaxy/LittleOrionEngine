@@ -1,7 +1,7 @@
 #include "ModuleTime.h"
 
-#include "EditorUI/EngineLog.h"
 #include "Filesystem/PathAtlas.h"
+#include "Log/EngineLog.h"
 #include "Helper/Timer.h"
 #include "Main/Application.h"
 #include "ModuleEditor.h"
@@ -24,7 +24,7 @@ bool ModuleTime::Init()
 {
 	APP_LOG_SECTION("************ Module Time Init ************");
 
-	APP_LOG_INIT("Initializing Engine clocks");
+	APP_LOG_INFO("Initializing Engine clocks");
 	real_time_clock = new Timer();
 	game_time_clock = new Timer();
 
@@ -34,14 +34,9 @@ bool ModuleTime::Init()
 	game_time_clock->Start();
 #endif
 
-	APP_LOG_SUCCESS("Engine clocks initialized correctly");
+	APP_LOG_INFO("Engine clocks initialized correctly");
 
 	return true;
-}
-
-update_status ModuleTime::PreUpdate()
-{
-	return update_status::UPDATE_CONTINUE;
 }
 
 
@@ -84,8 +79,6 @@ void ModuleTime::EndFrame()
 	if (frame_count % 10 == 0)
 	{
 		current_fps = 1000.f / real_time_delta_time;
-		App->engine_log->LogFPS(current_fps);
-		App->engine_log->LogMS(real_time_delta_time);
 	}
 
 	if (stepping_frame)
@@ -120,13 +113,14 @@ void ModuleTime::Play()
 	{
 		App->scene->SaveTmpScene();
 		game_time_clock->Start();
+		SetTimeScale(1.f);
 		frame_start_time = game_time_clock->Read();
 		App->animations->PlayAnimations();
 	}
 	else
 	{
 		game_time_clock->Stop();
-		App->scene->LoadScene();
+		App->scene->LoadTmpScene();
 	}
 }
 
@@ -164,6 +158,11 @@ void ModuleTime::StepFrame()
 void ModuleTime::SetTimeScale(float time_scale)
 {
 	this->time_scale = time_scale;
+}
+
+void ModuleTime::ResetInitFrame()
+{
+	frame_start_time = game_time_clock->Read();
 }
 
 bool ModuleTime::isGameRunning()

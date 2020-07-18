@@ -10,11 +10,10 @@
 #include <MathGeoLib/Geometry/LineSegment.h>
 #include <GL/glew.h>
 #include <list>
+#include <vector>
 
-class ComponentBillboard;
-class ComponentCamera;
 class ComponentMeshRenderer;
-class ComponentParticleSystem;
+class ComponentCamera;
 
 class GameObject;
 
@@ -47,16 +46,12 @@ public:
 	
 	void Render() const;
 	void RenderFrame(const ComponentCamera& camera);
+	void RenderZBufferFrame(const ComponentCamera& camera);
+	void GetMeshesToRender(const ComponentCamera* camera);
 
 
 	ComponentMeshRenderer* CreateComponentMeshRenderer();
 	void RemoveComponentMesh(ComponentMeshRenderer* mesh_to_remove);
-
-	ComponentBillboard* CreateComponentBillboard();
-	void RemoveComponentBillboard(ComponentBillboard* billboard_to_remove);
-
-	ComponentParticleSystem* CreateComponentParticleSystem();
-	void RemoveComponentParticleSystem(ComponentParticleSystem* particle_system_to_remove);
 
 	ENGINE_API int GetRenderedTris() const;
 	ENGINE_API int GetRenderedVerts() const;
@@ -79,11 +74,13 @@ private:
 
 	std::string GetDrawMode() const;
 
-	void GetMeshesToRender(const ComponentCamera* camera);
 	void SetListOfMeshesToRender(const ComponentCamera* camera);
 
 public:
 	bool anti_aliasing = false;
+	bool toggle_ortho_frustum = false;
+	bool toggle_directional_light_aabb = true;
+	bool toggle_perspective_sub_frustums = false;
 
 private:
 	void* context = nullptr;
@@ -107,12 +104,6 @@ private:
 	std::vector<ComponentMeshRenderer*> meshes;
 	std::vector<ComponentMeshRenderer*> meshes_to_render;
 
-	std::vector<ComponentBillboard*> billboards;
-	std::vector<ComponentBillboard*> billboards_to_render;
-
-	std::vector<ComponentParticleSystem*> particle_systems;
-	std::vector<ComponentParticleSystem*> particle_systems_to_render;
-
 	typedef std::pair<float, ComponentMeshRenderer*> ipair;
 	std::list <ipair> opaque_mesh_to_render, transparent_mesh_to_render;
 
@@ -125,8 +116,7 @@ private:
 	friend class ModuleSpacePartitioning;
 	friend class PanelConfiguration;
 	friend class PanelScene;
-	friend class NavMesh;
-	friend class ComponentParticleSystem;
+	friend class NavMesh; 
 };
 
 #endif //_MODULERENDER_H_

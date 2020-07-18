@@ -42,7 +42,7 @@ public:
 	void SetMaterial(uint32_t material_uuid);
 	void SetSkeleton(uint32_t skeleton_uuid);
 
-	void UpdatePalette(const std::vector<float4x4> & pose);
+	void UpdatePalette(std::vector<float4x4> & pose);
 
 private:
 	void AddDiffuseUniforms(unsigned int shader_program) const;
@@ -51,6 +51,8 @@ private:
 	void AddAmbientOclusionUniforms(unsigned int shader_program) const;
 	void AddNormalUniforms(unsigned int shader_program) const;
 	void AddLightMapUniforms(unsigned int shader_program) const;
+	void AddLiquidMaterialUniforms(unsigned int shader_program) const;
+	void AddDissolveMaterialUniforms(unsigned int shader_program) const;
 	void AddExtraUniforms(unsigned int shader_program) const;
 
 	bool BindTexture(Material::MaterialTextureType id) const;
@@ -70,6 +72,8 @@ public:
 	std::vector<float> morph_target_weights;
 
 	bool is_raycastable = true;
+	bool shadow_caster = false;
+	bool shadow_receiver = false;
 
 private:
 	friend class PanelComponent;

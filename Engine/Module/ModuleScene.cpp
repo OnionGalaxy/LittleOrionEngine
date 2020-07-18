@@ -5,8 +5,10 @@
 #include "Filesystem/PathAtlas.h"
 #include "Helper/BuildOptions.h"
 #include "Helper/Config.h"
+#include "Log/EngineLog.h"
 
 #include "Main/Application.h"
+#include "ModuleActions.h"
 #include "ModuleAnimation.h"
 #include "ModuleCamera.h"
 #include "ModuleEditor.h"
@@ -39,12 +41,14 @@ bool ModuleScene::Init()
 	assert(scene_metafile != nullptr);
 	tmp_scene = App->resources->Load<Scene>(scene_metafile->uuid);
 
+
+
 	return true;
 }
 
 update_status ModuleScene::PreUpdate()
 {
-	BROFILER_CATEGORY("Scene PreUpdate", Profiler::Color::Crimson);
+	BROFILER_CATEGORY("Module Scene PreUpdate", Profiler::Color::Crimson);
 	for (const auto& game_object : game_objects_ownership)
 	{
 		game_object->PreUpdate();
@@ -54,7 +58,7 @@ update_status ModuleScene::PreUpdate()
 
 update_status ModuleScene::Update()
 {
-	BROFILER_CATEGORY("Scene Update", Profiler::Color::Crimson);
+	BROFILER_CATEGORY("Module Scene Update", Profiler::Color::IndianRed);
 	for (const auto&  game_object : game_objects_ownership)
 	{
 		game_object->Update();
@@ -65,7 +69,7 @@ update_status ModuleScene::Update()
 
 update_status ModuleScene::PostUpdate()
 {
-	BROFILER_CATEGORY("Scene PostUpdate", Profiler::Color::Crimson);
+	BROFILER_CATEGORY("Module Scene PostUpdate", Profiler::Color::DarkRed);
 	for (const auto& game_object : game_objects_ownership)
 	{
 		game_object->PostUpdate();
@@ -79,7 +83,7 @@ bool ModuleScene::CleanUp()
 	return true;
 }
 
-ENGINE_API GameObject* ModuleScene::CreateGameObject()
+GameObject* ModuleScene::CreateGameObject()
 {
 	std::string created_game_object_name = App->editor->hierarchy->GetNextGameObjectName();
 	std::unique_ptr<GameObject> created_game_object = std::make_unique<GameObject>(created_game_object_name);
@@ -90,10 +94,13 @@ ENGINE_API GameObject* ModuleScene::CreateGameObject()
 	return created_game_object_ptr;
 }
 
-ENGINE_API GameObject* ModuleScene::CreateChildGameObject(GameObject *parent)
+GameObject* ModuleScene::CreateChildGameObject(GameObject *parent)
 {
 	GameObject * created_game_object_ptr = CreateGameObject();
 	parent->AddChild(created_game_object_ptr);
+	created_game_object_ptr->transform.SetTranslation(float3::zero);
+	created_game_object_ptr->transform.SetRotation(Quat::identity);
+	created_game_object_ptr->transform.SetScale(float3::one);
 
 	return created_game_object_ptr;
 }
@@ -160,6 +167,39 @@ GameObject* ModuleScene::DuplicateGameObject(GameObject* game_object, GameObject
 	return clone_GO;
 }
 
+void ModuleScene::DuplicateGameObjectList(std::vector<GameObject*> game_objects)
+{
+	for (auto go : game_objects) 
+	{
+		if (!HasParentInList(go, game_objects)) 
+		{
+			DuplicateGameObject(go, go->parent);
+		}
+	}
+}
+
+bool ModuleScene::HasParentInList(GameObject * go, std::vector<GameObject*> game_objects) const
+{
+	if (go->GetHierarchyDepth() == 1) 
+	{
+		return false;
+	}
+
+	int depth = go->GetHierarchyDepth();
+	GameObject *game_object = go;
+
+	while (depth >= 2) 
+	{
+		if (BelongsToList(game_object->parent, game_objects))
+		{
+			return true;
+		}
+		game_object = game_object->parent;
+		depth = depth - 1;
+	}
+	return false;
+}
+
 GameObject* ModuleScene::DuplicateGO(GameObject* game_object, GameObject* parent_go)
 {
 	std::unique_ptr<GameObject> aux_copy_pointer = std::make_unique<GameObject>();
@@ -180,6 +220,18 @@ GameObject* ModuleScene::DuplicateGO(GameObject* game_object, GameObject* parent
 	}
 
 	return duplicated_go;
+}
+
+bool ModuleScene::BelongsToList(GameObject * game_object, std::vector<GameObject*> game_objects) const
+{
+	for (auto go : game_objects)
+	{
+		if (go->UUID == game_object->UUID) 
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void ModuleScene::InitDuplicatedScripts(GameObject* clone_go)
@@ -204,7 +256,7 @@ GameObject* ModuleScene::GetRoot() const
 	return root;
 }
 
-ENGINE_API GameObject* ModuleScene::GetGameObject(uint64_t UUID) const
+GameObject* ModuleScene::GetGameObject(uint64_t UUID) const
 {
 	if (UUID == 0)
 	{
@@ -225,7 +277,7 @@ ENGINE_API GameObject* ModuleScene::GetGameObject(uint64_t UUID) const
 	return nullptr;
 }
 
-ENGINE_API GameObject* ModuleScene::GetGameObjectByName(const std::string & go_name) const
+GameObject* ModuleScene::GetGameObjectByName(const std::string & go_name) const
 {
 	APP_LOG_INFO("Getting game object %s", go_name.c_str());
 	APP_LOG_INFO("%d", game_objects_ownership.size())
@@ -284,6 +336,43 @@ Component * ModuleScene::GetComponent(uint64_t UUID) const
 	return nullptr;
 }
 
+void ModuleScene::SortGameObjectChilds(GameObject *go) const
+{
+	std::list<GameObject*> list;
+	for (auto& game_object : go->children)
+	{
+		list.push_back(game_object);
+	}
+
+	list.sort([](const GameObject *go1, const GameObject *go2)
+	{
+		std::string name = go1->name;
+		transform(name.begin(), name.end(), name.begin(), ::tolower);
+		std::string name2 = go2->name;
+		transform(name2.begin(), name2.end(), name2.begin(), ::tolower);
+		return name <= name2;
+	});
+
+	std::vector <GameObject*> game_objects;
+	for (auto go : list) 
+	{
+		game_objects.push_back(go);
+	}
+
+	go->children.swap(game_objects);
+	for (auto& game_object : go->children)
+	{
+		SortGameObjectChilds(game_object);
+	}
+
+}
+
+void ModuleScene::OpenPendingScene()
+{
+	OpenScene();
+	pending_scene_uuid = 0;
+}
+
 void ModuleScene::DeleteCurrentScene()
 {
 	//UndoRedo
@@ -296,10 +385,11 @@ void ModuleScene::DeleteCurrentScene()
 
 void ModuleScene::OpenScene()
 {
-	App->scene->DeleteCurrentScene();
+	App->animations->CleanTweens();
+	DeleteCurrentScene();
 	root = new GameObject(0);
 
-	GetSceneResource();
+	LoadSceneResource();
 
 	if (App->time->isGameRunning())
 	{
@@ -308,76 +398,61 @@ void ModuleScene::OpenScene()
 	App->space_partitioning->GenerateQuadTree();
 	App->space_partitioning->GenerateOctTree();
 	App->actions->ClearUndoStack();
+	App->time->ResetInitFrame();
 }
 
-inline void ModuleScene::GetSceneResource()
+inline void ModuleScene::LoadSceneResource()
 {
-	if (load_tmp_scene)
+	std::string uuid_string = std::to_string(pending_scene_uuid);
+	bool exists = App->filesystem->Exists(std::string(LIBRARY_METADATA_PATH) + "/" + uuid_string.substr(0,2)+"/"+uuid_string);
+	uint32_t default_uuid = GetSceneUUIDFromPath(DEFAULT_SCENE_PATH);
+	if (pending_scene_uuid == tmp_scene->GetUUID())
 	{
 		tmp_scene.get()->Load();
-		return;
+		current_scene = last_scene;
 	}
-	else if (build_options_position != -1)
+	else if (pending_scene_uuid == default_uuid || !exists)
 	{
-		if (!build_options->is_imported)
-		{
-			//Only gets here if no build options exists
-			GetSceneFromPath(DEFAULT_SCENE_PATH);
-		}
-		else
-		{
-			current_scene = App->resources->Load<Scene>(build_options.get()->GetSceneUUID(build_options_position));
-			App->editor->current_scene_path = build_options.get()->GetScenePath(build_options_position);
-		}
+		current_scene = nullptr;
+		App->resources->Load<Scene>(default_uuid).get()->Load();
 	}
 	else
 	{
-		int position = build_options.get()->GetPositionFromPath(scene_to_load);
-
-		#if GAME
-			assert(position != -1);
-		#endif
-
-		(position != -1)
-			? current_scene = App->resources->Load<Scene>(build_options.get()->GetSceneUUID(position))
-			: GetSceneFromPath(scene_to_load);
+		current_scene = App->resources->Load<Scene>(pending_scene_uuid);
+		current_scene.get()->Load();
 	}
-
-	current_scene.get()->Load();
 }
 
-void ModuleScene::GetSceneFromPath(const std::string& path)
+uint32_t ModuleScene::GetSceneUUIDFromPath(const std::string& path)
 {
 	Path* metafile_path = App->filesystem->GetPath(App->resources->metafile_manager->GetMetafilePath(path));
 	Metafile* scene_metafile = App->resources->metafile_manager->GetMetafile(*metafile_path);
 	assert(scene_metafile != nullptr);
-	current_scene = App->resources->Load<Scene>(scene_metafile->uuid);
+	return scene_metafile->uuid;
 }
 
-void ModuleScene::OpenPendingScene()
+void ModuleScene::LoadScene(const std::string &path)
 {
-	OpenScene();
-	scene_to_load.clear();
-	build_options_position = -1;
-	load_tmp_scene = false;
+	pending_scene_uuid = GetSceneUUIDFromPath(path);
 }
 
-ENGINE_API void ModuleScene::LoadScene(const std::string &path)
+void ModuleScene::LoadScene(unsigned position)
 {
-	scene_to_load = path;
+	if (build_options->is_imported)
+	{
+		pending_scene_uuid = build_options->GetSceneUUID(position);
+		if (pending_scene_uuid == 0)
+		{
+			OpenNewScene();
+		}
+	}
+	else
+	{
+		OpenNewScene();
+	}
 }
 
-ENGINE_API void ModuleScene::LoadScene(unsigned position)
-{
-	build_options_position = position;
-}
-
-void ModuleScene::LoadScene()
-{
-	load_tmp_scene = true;
-}
-
-void ModuleScene::SaveScene()
+void ModuleScene::SaveScene(uint32_t scene_uuid)
 {
 	if(App->time->isGameRunning())
 	{
@@ -385,21 +460,40 @@ void ModuleScene::SaveScene()
 		return;
 	}
 
-	App->resources->Save<Scene>(current_scene);
+	if (scene_uuid == 0) // Save current scene in its own resource
+	{
+		assert(current_scene != nullptr);
+		App->resources->Save<Scene>(current_scene);
+	}
+	else // Save current scene in other resource
+	{
+		current_scene = App->resources->Load<Scene>(scene_uuid);
+		App->resources->Save<Scene>(current_scene);
+	}
+}
+
+void ModuleScene::OpenNewScene()
+{
+	LoadScene(DEFAULT_SCENE_PATH);
 }
 
 void ModuleScene::SaveTmpScene()
 {
 	App->resources->Save<Scene>(tmp_scene);
+	last_scene = current_scene;
+}
+
+void ModuleScene::LoadTmpScene()
+{
+	LoadScene(TMP_SCENE_PATH);
 }
 
 bool ModuleScene::HasPendingSceneToLoad() const
 {
-	return !scene_to_load.empty() || build_options_position != -1 || load_tmp_scene;
+	return pending_scene_uuid != 0;
 }
 
-void ModuleScene::SetCurrentScene(uint32_t uuid)
+bool ModuleScene::CurrentSceneIsSaved() const
 {
-	current_scene = App->resources->Load<Scene>(uuid);
+	return current_scene != nullptr;
 }
-

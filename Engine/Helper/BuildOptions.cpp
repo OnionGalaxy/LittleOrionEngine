@@ -1,8 +1,10 @@
 #include "BuildOptions.h"
 
+
 #include "Filesystem/File.h"
 #include "Filesystem/PathAtlas.h"
 #include "Helper/Config.h"
+#include "Log/EngineLog.h"
 #include "Main/Application.h"
 #include "Module/ModuleFileSystem.h"
 
@@ -97,8 +99,14 @@ bool BuildOptions::SaveOptions() const
 
 uint32_t BuildOptions::GetSceneUUID(unsigned position) const
 {
-	assert(position < build_scenes.size());
-	return build_scenes[position].scene_uuid;
+	if (position < build_scenes.size())
+	{
+		return build_scenes[position].scene_uuid;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 std::string BuildOptions::GetScenePath(unsigned position) const

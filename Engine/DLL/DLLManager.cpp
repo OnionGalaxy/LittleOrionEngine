@@ -20,7 +20,8 @@ DLLManager::DLLManager()
 	gameplay_dll = LoadLibrary(RESOURCE_SCRIPT_DLL_FILE);
 #else
 	CleanFolder();
-
+	hot_reloading = true;
+	std::thread(&DLLManager::CheckCompilation, this).detach();
 	dll_file = App->filesystem->GetPath(std::string("/") + RESOURCES_SCRIPT_DLL_PATH);
 	cr_plugin_open(hot_reloading_context, RESOURCES_SCRIPT_DLL_PATH);
 	cr_plugin_update(hot_reloading_context);
@@ -117,7 +118,7 @@ void DLLManager::CheckCompilation()
 		{
 			if (App->filesystem->Exists(COMPILED_SCRIPT_DLL_PATH) && hot_reloading)
 			{
-				APP_LOG_SUCCESS("Compilation was successful");
+				APP_LOG_INFO("Compilation was successful");
 				hot_reloading = false;
 			}
 			else

@@ -1,15 +1,12 @@
-#version 430
-
-//Commit addition (sorry)
-
 layout(location = 0) in vec3 vertex_position;
 layout(location = 1) in vec2 vertex_uv0;
 layout(location = 7) in vec2 vertex_uv1;
 layout(location = 2) in vec3 vertex_normal;
 layout(location = 3) in vec3 vertex_tangent;
 layout(location = 4) in uvec4 vertex_joints;
-layout(location = 5) in vec4 vertex_weights;
+layout(location = 5) in vec3 vertex_weights;
 layout(location = 6) in uint vertex_num_joints;
+
 
 layout(location = 8) in uint vertex_index;
 
@@ -64,28 +61,42 @@ struct Material {
 
 uniform Material material;
 
+uniform int time;
+
 out vec2 texCoord;
 out vec2 texCoordLightmap;
 out vec3 position;
 out vec3 normal;
-out vec3 tangent;
 out mat3 TBN;
 
 //Without tangent modification
 out vec3 view_pos;
 out vec3 view_dir;
-out vec3 half_dir;
 
-//With tangent modification
-out vec3 t_view_pos;
-out vec3 t_frag_pos;
+//SHADOWS
+uniform mat4 close_directional_view;
+uniform mat4 close_directional_proj;
 
-//Normal mapping
-mat3 CreateTangentSpace(const vec3 normal, const vec3 tangent);
+uniform mat4 mid_directional_view;
+uniform mat4 mid_directional_proj;
 
+uniform mat4 far_directional_view;
+uniform mat4 far_directional_proj;
+
+out vec4 close_pos_from_light;
+out vec4 mid_pos_from_light;
+out vec4 far_pos_from_light;
+out vec3 vertex_normal_fs;
+out vec3 vertex_tangent_fs;
+uniform float render_depth_from_light;
+
+out float distance_to_camera;
 
 void main()
 {
+	mat4 close_lightSpaceMatrix = close_directional_proj * close_directional_view;
+	mat4 mid_lightSpaceMatrix   = mid_directional_proj * mid_directional_view;
+	mat4 far_lightSpaceMatrix   = far_directional_proj * far_directional_view;
 
 //Skinning
 	mat4 skinning_matrix = mat4(has_skinning_value);
@@ -109,34 +120,24 @@ void main()
 	texCoord = vertex_uv0;
 	texCoordLightmap = vertex_uv1;
 
-	position = (matrices.model*skinning_matrix*vec4(vertex_position + morph_position, 1.0)).xyz;
-	normal = (matrices.model*skinning_matrix*vec4(vertex_normal + morph_normal, 0.0)).xyz;
-	tangent = (matrices.model*skinning_matrix*vec4(vertex_tangent + morph_tangent, 0.0)).xyz;
+	vertex_normal_fs =vertex_normal;
+	vertex_tangent_fs =vertex_tangent;
+	position = (matrices.model*skinning_matrix*vec4(vertex_position, 1.0)).xyz;
+	normal = (matrices.model*skinning_matrix*vec4(vertex_normal, 0.0)).xyz;
 
 	view_pos    = transpose(mat3(matrices.view)) * (-matrices.view[3].xyz);
 	view_dir    = normalize(view_pos - position);
-	
 
 
-//Tangent space matrix
-	mat3 normalMatrix = mat3(matrices.model);
-    vec3 T = normalize(normalMatrix * vertex_tangent);
-    vec3 N = normalize(normalMatrix * vertex_normal);
-    T = normalize(T - dot(T, N) * N);
-    vec3 B = cross(N, T);
+	//Light space
+	close_pos_from_light = close_lightSpaceMatrix*vec4(position, 1.0);
+	mid_pos_from_light = mid_lightSpaceMatrix*vec4(position, 1.0);
+	far_pos_from_light = far_lightSpaceMatrix*vec4(position, 1.0);
 
-	TBN = transpose(mat3(T, B, N));  
+	vec4 eye_coordinate_pos = matrices.view * matrices.model * skinning_matrix * vec4(vertex_position+ morph_position, 1.0);
+	distance_to_camera = -eye_coordinate_pos.z;
 
-//Computing tangent variables for normal mapping
-	t_view_pos = TBN * view_pos;
-	t_frag_pos = TBN * position;
 
-	gl_Position = matrices.proj * matrices.view * matrices.model * skinning_matrix * vec4(vertex_position+ morph_position, 1.0);
-}
+	gl_Position = matrices.proj * eye_coordinate_pos;
 
-mat3 CreateTangentSpace(const vec3 normal, const vec3 tangent)
-{
-	vec3 ortho_tangent = normalize(tangent-dot(tangent, normal)*normal); // Gram-Schmidt
-	vec3 bitangent = cross(normal, ortho_tangent);
-	return mat3(tangent, bitangent, normal);
 }

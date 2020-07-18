@@ -1,15 +1,45 @@
 #include "ModuleAnimation.h"
 
+#include "Component/ComponentAnimation.h"
+
+#include "Log/EngineLog.h"
 #include "Main/Application.h"
 #include "Main/GameObject.h"
-#include "Component/ComponentAnimation.h"
+#include "Module/ModuleTime.h"
+
+#include <Brofiler/Brofiler.h>
 
 bool ModuleAnimation::Init()
 {
 	APP_LOG_SECTION("************ Module Animation Init ************");
-	
+	tweener = new LOTween();
 
 	return true;
+}
+
+update_status ModuleAnimation::Update()
+{
+	BROFILER_CATEGORY("Module Animation Update", Profiler::Color::LemonChiffon);
+	if (App->time->isGameRunning())
+	{
+		tweener->Update(App->time->delta_time);
+	}
+	else
+	{
+		tweener->Reset();
+	}
+
+	return update_status::UPDATE_CONTINUE;
+}
+
+update_status ModuleAnimation::PostUpdate()
+{
+	if (App->time->isGameRunning())
+	{
+		tweener->CleanSequences();
+	}
+
+	return update_status::UPDATE_CONTINUE;
 }
 
 bool ModuleAnimation::CleanUp()
@@ -19,6 +49,8 @@ bool ModuleAnimation::CleanUp()
 		animation->owner->RemoveComponent(animation);
 	}
 	animations.clear();
+
+	delete(tweener);
 
 	return true;
 }
@@ -61,4 +93,15 @@ void ModuleAnimation::PlayAnimations() const
 	{
 		anim->Play();
 	}
+}
+
+TweenSequence * ModuleAnimation::CreateTweenSequence()
+{
+	TweenSequence* sequence = tweener->CreateSequence();
+	return sequence;
+}
+
+void ModuleAnimation::CleanTweens()
+{
+	tweener->Reset();
 }

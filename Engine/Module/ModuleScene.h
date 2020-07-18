@@ -1,5 +1,6 @@
 #ifndef _MODULESCENE_H_
 #define _MODULESCENE_H_
+
 #define ENGINE_EXPORTS
 
 #include "Module.h"
@@ -26,6 +27,9 @@ public:
 	void RemoveGameObject(GameObject* game_object_to_remove);
 	GameObject* AddGameObject(std::unique_ptr<GameObject> & game_object_to_add);
 	ENGINE_API GameObject* DuplicateGameObject(GameObject* game_object, GameObject* parent_go);
+	void DuplicateGameObjectList(std::vector<GameObject*> game_objects);
+	bool HasParentInList(GameObject* go, std::vector<GameObject*>) const;
+	bool BelongsToList(GameObject* go, std::vector<GameObject*>) const;
 	void InitDuplicatedScripts(GameObject* clone_go);
 
 	ENGINE_API GameObject* GetRoot() const;
@@ -36,24 +40,29 @@ public:
 	ENGINE_API std::vector<GameObject*> GetGameObjectsWithTag(const std::string& tag) const;
 
 	Component* GetComponent(uint64_t UUID) const;
-
+	void SortGameObjectChilds(GameObject* go) const;
 
 	void OpenPendingScene();
 	void DeleteCurrentScene();
 
+
 	ENGINE_API void LoadScene(const std::string& path);
 	ENGINE_API void LoadScene(unsigned position);
-	void LoadScene();
-	void SaveScene();
-	void SaveTmpScene();
-	bool HasPendingSceneToLoad() const;
 
-	void SetCurrentScene(uint32_t uuid);
+	void SaveScene(uint32_t scene_uuid = 0);
+
+	void OpenNewScene();
+	void LoadTmpScene();
+	void SaveTmpScene();
+
+	bool HasPendingSceneToLoad() const;
+	bool CurrentSceneIsSaved() const;
 
 private:
 	void OpenScene();
-	inline void GetSceneResource();
-	void GetSceneFromPath(const std::string& path);
+	inline void LoadSceneResource();
+	uint32_t GetSceneUUIDFromPath(const std::string& path);
+
 	//Don't use this function use the public one
 	GameObject* DuplicateGO(GameObject* game_object, GameObject* parent_go);
 
@@ -61,11 +70,13 @@ private:
 private:
 	GameObject* root = nullptr;
 	std::vector<std::unique_ptr<GameObject>> game_objects_ownership;
+
 	std::shared_ptr<Scene> current_scene = nullptr;
+	uint32_t pending_scene_uuid = 0;
+
 	std::shared_ptr<Scene> tmp_scene = nullptr;
-	std::string scene_to_load;
-	int build_options_position = -1;
-	bool load_tmp_scene = false;
+	std::shared_ptr<Scene> last_scene = 0;
+
 	std::unique_ptr<BuildOptions> build_options = nullptr;
 
 	friend class PanelScene;

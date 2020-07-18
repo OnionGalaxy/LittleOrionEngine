@@ -23,6 +23,10 @@ ComponentAnimation::ComponentAnimation(GameObject* owner) : Component(owner, Com
 	Init();
 }
 
+AnimController* ComponentAnimation::GetAnimController()
+{
+	return animation_controller;
+}
 ComponentAnimation::~ComponentAnimation()
 {
 	if (animation_controller)
@@ -33,6 +37,10 @@ ComponentAnimation::~ComponentAnimation()
 
 void ComponentAnimation::Init()
 {
+	if (!animation_controller->state_machine)
+	{
+		return;
+	}
 	skinned_meshes.clear();
 	GetChildrenMeshes(owner);
 	if (animation_controller->state_machine)
@@ -90,7 +98,7 @@ void ComponentAnimation::Play()
 	{
 		return;
 	}
-	playing_clip->current_time = 0;
+	playing_clip->current_time = 0.0f;
 	playing_clip->playing = true;
 	playing = true;
 }
@@ -114,6 +122,16 @@ ENGINE_API bool ComponentAnimation::IsOnState(const std::string& trigger)
 
 ENGINE_API float ComponentAnimation::GetCurrentClipPercentatge() const
 {
+	if (animation_controller->playing_clips[ClipType::ACTIVE].clip)
+	{
+		return math::Clamp01(float(animation_controller->playing_clips[ClipType::ACTIVE].current_time) / float(animation_controller->playing_clips[ClipType::ACTIVE].clip->animation_time));
+	}
+
+	return 0.0f;
+}
+
+ENGINE_API int ComponentAnimation::GetTotalAnimationTime() const
+{
 	for (auto& playing_clip : animation_controller->playing_clips)
 	{
 		if (!playing_clip.clip)
@@ -121,10 +139,19 @@ ENGINE_API float ComponentAnimation::GetCurrentClipPercentatge() const
 			break;
 		}
 
-		return float(playing_clip.current_time) / float(playing_clip.clip->animation_time);
+		return playing_clip.clip->animation_time;
 
 	}
+	return 0;
 }
+
+void ComponentAnimation::SetAnimationSpeed(float speed) const
+{
+	animation_controller->SetSpeed(speed);
+
+	return;
+}
+
 
 void ComponentAnimation::Update()
 {
@@ -150,10 +177,10 @@ void ComponentAnimation::UpdateMeshes()
 	for (auto & mesh : skinned_meshes)
 	{
 		auto & skeleton = mesh->skeleton;
-		pose.resize(skeleton->skeleton.size());
+		animation_controller->GetClipTransform(skeleton, pose, mesh->mesh_to_render->mesh_name_hash, mesh->morph_target_weights);
 
-		animation_controller->GetClipTransform(skeleton->GetUUID(), pose, mesh->mesh_to_render->mesh_name_hash, mesh->morph_target_weights);
 		mesh->UpdatePalette(pose);
+		animation_controller->UpdateAttachedBones(skeleton, pose);
 	}
 }
 
@@ -170,7 +197,7 @@ void ComponentAnimation::SpecializedSave(Config& config) const
 
 void ComponentAnimation::SpecializedLoad(const Config& config)
 {
-	uint32_t state_machine_uuid = config.GetUInt("StateMachineResource", 0);
+	uint32_t state_machine_uuid = config.GetUInt32("StateMachineResource", 0);
 	if (state_machine_uuid != 0)
 	{
 		SetStateMachine(state_machine_uuid);
@@ -193,27 +220,54 @@ void ComponentAnimation::GetChildrenMeshes(GameObject* current_mesh_gameobject)
 
 void ComponentAnimation::GenerateJointChannelMaps()
 {
+
 	for (auto& clip : animation_controller->state_machine->clips)
 	{
 		for (auto& mesh : skinned_meshes)
 		{
-			auto & skeleton = mesh->skeleton;
-			if (clip->animation == nullptr || clip->skeleton_channels_joints_map.find(skeleton->GetUUID()) != clip->skeleton_channels_joints_map.end())
+			auto & skeleton = mesh->skeleton->skeleton;
+			size_t skeleton_uuid = mesh->skeleton->GetUUID();
+			GenerateAttachedBones(mesh->owner, skeleton);
+			if (clip->animation == nullptr || clip->skeleton_channels_joints_map.find(skeleton_uuid) != clip->skeleton_channels_joints_map.end())
 			{
 				break;
 			}
+			std::vector<size_t> meshes_channels_joints_map(skeleton.size());
 			auto & channels = clip->animation->keyframes[0].channels;
-			std::vector<size_t> meshes_channels_joints_map(channels.size());
-			for (size_t j = 0; j < channels.size(); ++j)
+			for (size_t j = 0; j < skeleton.size(); ++j)
 			{
-				auto & channel = channels[j];
-				auto it = std::find_if(skeleton->skeleton.begin(), skeleton->skeleton.end(), [&channel](const Skeleton::Joint & joint) {
+				auto & joint = skeleton[j];
+				auto it = std::find_if(channels.begin(), channels.end(), [&joint](const Animation::Channel & channel) {
 					return channel.name == joint.name;
 				});
 
-				meshes_channels_joints_map[j] = (it - skeleton->skeleton.begin());
+				meshes_channels_joints_map[j] = (it - channels.begin());
+
 			}
-			clip->skeleton_channels_joints_map[skeleton->GetUUID()] = std::move(meshes_channels_joints_map);
+			clip->skeleton_channels_joints_map[skeleton_uuid] = std::move(meshes_channels_joints_map);
+
+
 		}
 	}
 }
+
+void ComponentAnimation::GenerateAttachedBones(GameObject* mesh, std::vector<Skeleton::Joint> & skeleton)
+{
+	if (mesh->children.empty())
+	{
+		return;
+	}
+	animation_controller->attached_bones.clear();
+
+	for (size_t j = 0; j < skeleton.size(); ++j)
+	{
+		for (GameObject* child : mesh->children)
+		{
+			if (skeleton[j].name == child->name)
+			{
+				animation_controller->attached_bones.push_back({ j,child });
+			}
+		}
+	}
+}
+
