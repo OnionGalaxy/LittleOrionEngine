@@ -20,7 +20,7 @@
   </a>
 </p>
 
-![](https://github.com/Unnamed-Company/LittleOrionEngine/blob/develop/Media/README_usage/engine.png)
+![](https://github.com/OnionGalaxy/LittleOrionEngine/blob/master/Media/README_usage/engine.png)
 
 ## Highlights
 - Create, save and load scenes.
@@ -66,6 +66,9 @@ Because this is a academic project is not possible to contribute directly to thi
     <td align="center"><a href="https://github.com/vidalmelero"><img src="https://avatars2.githubusercontent.com/u/43371298?v=4" width="100px;" alt=""/><br /><sub><b>Vidal Melero</b></sub></a><br /></td>
 </tr>
 </table>
+
+## Commit race
+![](https://github.com/OnionGalaxy/LittleOrionEngine/blob/master/Media/README_usage/commit_ranking.png)
 
 ## Developement methodology
 This project was developed following agile methodologies philosophy. If you are interested to know the tasks distribution don't hesitate to visit our [Trello board](https://trello.com/b/uFhGXWJ1/littleorionengine)!
